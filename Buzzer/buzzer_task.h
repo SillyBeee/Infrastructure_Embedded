@@ -3,15 +3,15 @@
 
 void buzzer_task(void const * argument){
 
-    playtone_arr(2);
+    PlaytoneArr(2);
     osDelay(250);
-    stoptone();
-    playtone_arr(3);
+    Stoptone();
+    PlaytoneArr(3);
     osDelay(250);
-    stoptone();
-    playtone_arr(6);
+    Stoptone;
+    Playtone(6);
     osDelay(350);
-    stoptone();
+    Stoptone();
     __HAL_TIM_SET_AUTORELOAD(&Buzzer_tim, 6000);
     __HAL_TIM_SET_COMPARE(&Buzzer_tim,Buzzer_channel, 0);
     HAL_TIM_PWM_Stop(&Buzzer_tim,Buzzer_channel);
