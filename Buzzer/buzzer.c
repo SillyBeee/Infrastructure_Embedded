@@ -1,5 +1,12 @@
 #include "buzzer.h"
 
+
+void Buzzer_Init(void)
+{
+    HAL_TIM_Base_Init(&Buzzer_tim);
+    HAL_TIM_PWM_Start(&Buzzer_tim,Buzzer_channel);
+}
+
 void Playtone(int num){
     int arr = 0;
     int tone = tones[num-1];

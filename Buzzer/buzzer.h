@@ -10,6 +10,8 @@ int tones[12] = {261,270,293,311,329,349,370,392,415,440,466,493};
 int tones_arr[12] = {45977,44444,40955,38585,36474,34383,32432,30612,28915,27272,25751,24340};
 
 
+void Buzzer_Init(void);
+
 void Playtone(int num);
 
 void PlaytoneArr(int num);
