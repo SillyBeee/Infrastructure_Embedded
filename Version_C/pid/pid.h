@@ -1,5 +1,7 @@
 #ifndef PID_H
 #define PID_H
+#include "stdbool.h"
+
 
 typedef enum{
     NORMAL_PID,  //普通PID
@@ -26,6 +28,10 @@ typedef struct {
     float Variable_Speed_Integral_Lower_Limit;  //变速积分下限
     float Variable_Speed_Integral_Upper_Limit;  //变速积分上限
 
+    bool  EnableZeroCrossingProtection;  //是否开启过零点保护
+    bool  EnableFirstOrderFiltering;   //是否开启一阶滤波
+    float  FirstOrderFiltering_Coefficient;  //一阶滤波系数
+    float  ZeroCrossingProtection_Threshold;  //过零点保护阈值
     Pid_Type type;
 }  Pid;
 
@@ -36,15 +42,21 @@ void Pid_Update(Pid *pid ,float current_value , float target_value);
 
 void Pid_Init(Pid *pid, float Kp, float Ki, float Kd, float dt, Pid_Type type);
 
-void Normal_Pid_Update(Pid *pid ,float current_speed , float target_speed);
+void Normal_Pid_Update(Pid *pid ,float current_value , float target_value);
 
 void Intergral_Separation_Pid_Update(Pid *pid ,float current_value , float target_value);
+
+void Pid_Enable_ZeroCrossingProtection(Pid *pid, bool EnableZeroCrossingProtection , float  ZeroCrossingProtection_Threshold);
+
+void Pid_Enable_FirstOrderFiltering(Pid *pid, bool EnableFirstOrderFiltering , float FirstOrderFiltering_Coefficient);
 
 void Pid_Set_Kp(Pid *pid, float Kp);
 
 void Pid_Set_Ki(Pid *pid, float Ki);
 
 void Pid_Set_Kd(Pid *pid, float Kd);
+
+void Pid_Set_Target(Pid *pid, float target);
 
 void Pid_Set_Max_Output(Pid *pid, float max_output);
 
