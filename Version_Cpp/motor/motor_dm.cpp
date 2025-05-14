@@ -38,12 +38,16 @@ void DM4310::MIT_Ctl_Msg_Send(const float pos , const float vel , const float kp
     {
     case(MIT_MODE):
         tx_header.StdId = this->can_id;
+        break;
     case(POSITION_AND_SPEED_MODE):
         tx_header.StdId = this->can_id+0x100;
+        break;
     case(SPEED_MODE):
         tx_header.StdId = this->can_id+0x200;
+        break;
     case(NONE_MODE):
         DM_Error_Handler();
+        break;
     }
     tx_header.IDE = CAN_ID_STD;
     tx_header.RTR = CAN_RTR_DATA;
@@ -67,6 +71,20 @@ void DM4310::MIT_Ctl_Msg_Send(const float pos , const float vel , const float kp
     HAL_CAN_AddTxMessage(this->hcan,&tx_header,tx_data,&tx_mailbox);
 }
 
+
+void DM4310::Deserialize_Status(const uint8_t* status_buffer)
+{
+
+    int p_int=(status_buffer[1]<<8)|status_buffer[2];
+    int v_int=(status_buffer[3]<<4)|(status_buffer[4]>>4);
+    int t_int=((status_buffer[4]&0xF)<<8)|status_buffer[5];
+    this->status.Position = uint_to_float(p_int, P_MIN, P_MAX, 16); // (-12.5,12.5)
+    this->status.Speed = uint_to_float(v_int, V_MIN, V_MAX, 12); // (-45.0,45.0)
+    this->status.Torque= uint_to_float(t_int, T_MIN, T_MAX, 12); // (-18.0,18.0)
+    this->status.error_code = status_buffer[0]>>4;
+
+}
+
 void DM4310::Enable() const
 {
     CAN_TxHeaderTypeDef tx_header;
@@ -74,12 +92,16 @@ void DM4310::Enable() const
     {
         case(MIT_MODE):
             tx_header.StdId = this->can_id;
+            break;
         case(POSITION_AND_SPEED_MODE):
             tx_header.StdId = this->can_id+0x100;
+            break;
         case(SPEED_MODE):
             tx_header.StdId = this->can_id+0x200;
+            break;
         case(NONE_MODE):
             DM_Error_Handler();
+            break;
     }
     tx_header.IDE = CAN_ID_STD;
     tx_header.RTR = CAN_RTR_DATA;
@@ -105,12 +127,16 @@ void DM4310::Disable() const
     {
     case(MIT_MODE):
         tx_header.StdId = this->can_id;
+        break;
     case(POSITION_AND_SPEED_MODE):
         tx_header.StdId = this->can_id+0x100;
+        break;
     case(SPEED_MODE):
         tx_header.StdId = this->can_id+0x200;
+        break;
     case(NONE_MODE):
         DM_Error_Handler();
+        break;
     }
     tx_header.IDE = CAN_ID_STD;
     tx_header.RTR = CAN_RTR_DATA;
@@ -135,12 +161,16 @@ void DM4310::Reset_Error() const
     {
     case(MIT_MODE):
         tx_header.StdId = this->can_id;
+        break;
     case(POSITION_AND_SPEED_MODE):
         tx_header.StdId = this->can_id+0x100;
+        break;
     case(SPEED_MODE):
         tx_header.StdId = this->can_id+0x200;
+        break;
     case(NONE_MODE):
         DM_Error_Handler();
+        break;
     }
     tx_header.IDE = CAN_ID_STD;
     tx_header.RTR = CAN_RTR_DATA;
@@ -156,6 +186,12 @@ void DM4310::Reset_Error() const
     tx_data[6] = 0xFF;
     tx_data[7] = 0xFB;
     HAL_CAN_AddTxMessage(this->hcan,&tx_header,tx_data,&tx_mailbox);
+}
+
+
+void DM4310::Pid_Update()
+{
+
 }
 
 void DM4310::DM_Error_Handler()
@@ -181,3 +217,5 @@ void DM4310::Bind_CAN(CAN_HandleTypeDef* hcan)
 {
     this->hcan = hcan;
 }
+
+

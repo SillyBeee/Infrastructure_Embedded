@@ -35,9 +35,9 @@ typedef enum
 typedef struct
 {
     uint16_t error_code = 0;
-    int Position = 0;
-    int Speed = 0;
-    int Torque = 0;
+    float Position = 0;
+    float Speed = 0;
+    float Torque = 0;
     int Temperature_MOS = 0;
     int Temperature_Rotor = 0;
 } Motor_Status;
@@ -49,11 +49,12 @@ public:
     explicit DM4310(Motor_DM_Mode mode = NONE_MODE, CAN_HandleTypeDef* hcan = &hcan1, uint8_t can_id = 0, uint8_t master_id = 0 , Pid_Type pid_type = NONE_PID);
     void Set_Angle(float angle , float speed ) override;
     void Set_Speed(float speed) override;
-    void Pid_Update() override;
+
 
     void Enable() const;
     void Disable() const;
     void Reset_Error() const;
+    void Deserialize_Status(const uint8_t* status_buffer);
 
     void Bind_CAN(CAN_HandleTypeDef* hcan);
     void Set_CTL_Mode(Motor_DM_Mode mode);
@@ -62,10 +63,14 @@ public:
     static void DM_Error_Handler();
     using Motor::Set_Pid_Type;
 
+
+    uint8_t status_buffer[8] = {0};
 private:
     void MIT_Ctl_Msg_Send(float pos , float vel , float kp , float kd , float torque) const;
+    void Pid_Update() override;
+
     Motor_Status status;
-    uint8_t status_buffer[8] = {0};
+
     uint8_t master_id;
     uint8_t can_id;
     Motor_DM_Mode mode;

@@ -15,3 +15,7 @@ void Motor::Set_Pid_Type(Pid_Type pid_type)
     this->pid_type = pid_type;
 }
 
+Motor::~Motor()
+{
+
+}
