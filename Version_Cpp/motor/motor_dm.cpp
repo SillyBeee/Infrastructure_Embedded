@@ -19,8 +19,9 @@ DM4310::DM4310(const Motor_DM_Mode mode, CAN_HandleTypeDef* hcan, const uint8_t 
 
 }
 
-void DM4310::Set_Angle(const float angle, float speed)
+void DM4310::Set_Angle(float angle, const float speed)
 {
+
     switch(this->mode)
     {
     case(MIT_MODE):
@@ -284,7 +285,9 @@ void DM4310::Pid_Update(float target)
     }
     if (this->pid_type == POSITION_LOOP)
     {
-        this->pid_angle.Pid_Update(this->status.Position ,  target);
+        const float target_pos = (target - P_MIN) * (2 * M_PI) / (P_MAX - P_MIN);
+        const float current_pos = (this->status.Position - P_MIN) * (2 * M_PI) / (P_MAX - P_MIN);
+        this->pid_angle.Pid_Update(current_pos ,  target_pos);
         this->pid_speed.Pid_Update(this->status.Speed , this->pid_angle.Get_Output());
         MIT_Ctl_Msg_Send(0,0,0,0,this->pid_speed.Get_Output());
 

@@ -44,7 +44,7 @@ PID::PID(const float kp, const float ki, const float kd, const float dt, const f
 void PID::Pid_Update(float current_value, float target_value)
 {
     this->error_last = this->error;
-
+    this->target = target_value;
 
     //过零保护段
     if (this->enable_zero_crossing_protection) {

@@ -32,7 +32,7 @@ public:
     void Enable_Variable_Speed_Integral(float Variable_Speed_Integral_Lower_Limit , float Variable_Speed_Integral_Upper_Limit , float alpha_e);
     void Disable_Variable_Speed_Integral();
     //过零保护段
-    void Enable_ZeroCrossingProtection(float ZeroCrossingProtection_Threshold);
+    void Enable_ZeroCrossingProtection(float ZeroCrossingProtection_Threshold = 3.1415926f);
     void Disable_ZeroCrossingProtection();
     //微分先行段
     void Enable_Differential_First();
