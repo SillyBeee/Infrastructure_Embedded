@@ -138,6 +138,14 @@ void PID::Pid_Update(float current_value, float target_value)
 
 }
 
+void PID::Set_Parameters(const float kp, const float ki, const float kd, const float dt)
+{
+    this->kp = kp;
+    this->ki = ki;
+    this->Kd = kd; //微分系数
+    this->dt = dt; //采样时间
+}
+
 void PID::Set_Max_Output(const float max_output)
 {
     this->max_output = max_output;
@@ -215,6 +223,11 @@ void PID::Enable_Differential_First()
 void PID::Disable_Differential_First()
 {
     this->enable_differential_first = false;
+}
+
+float PID::Get_Output() const
+{
+    return this->output;
 }
 
 
