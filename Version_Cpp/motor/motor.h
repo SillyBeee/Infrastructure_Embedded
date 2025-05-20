@@ -19,6 +19,43 @@ typedef enum
     POSITION_LOOP,
 }Pid_Type;
 
+typedef enum
+{
+    VOLTAGE_CTL,
+    CURRENT_CTL,
+}Motor_GM_Mode;
+
+
+
+typedef struct
+{
+    int  Position = 0;
+    int Speed = 0;
+    int Current = 0;
+    int Temperature = 0;
+
+}GM_Motor_Status;
+
+
+typedef enum
+{
+    MIT_MODE,
+    MIT_TORQUE_MODE,
+    POSITION_AND_SPEED_MODE,
+    SPEED_MODE,
+    NONE_MODE,
+} Motor_DM_Mode;
+
+
+typedef struct
+{
+    uint16_t error_code = 0;
+    float Position = 0;
+    float Speed = 0;
+    float Torque = 0;
+    int Temperature_MOS = 0;
+    int Temperature_Rotor = 0;
+} DM_Motor_Status;
 
 
 class Motor

@@ -167,6 +167,9 @@ void DM4310::Deserialize_Status(const uint8_t* status_buffer)
     this->status.Torque= uint_to_float(t_int, T_MIN, T_MAX, 12); // (-18.0,18.0)
     this->status.error_code = status_buffer[0]>>4;
 
+    this->status.Temperature_MOS = status_buffer[6];
+    this->status.Temperature_Rotor = status_buffer[7];
+
 }
 
 void DM4310::Enable() const
@@ -341,4 +344,15 @@ void DM4310::Set_Pid_Type(const Pid_Type pid_type)
         this->pid_speed.Set_Parameters(0,0,0,0.001);
     }
 }
+
+uint8_t DM4310::Get_Can_ID() const
+{
+    return this->can_id;
+}
+
+uint8_t DM4310::Get_Master_ID() const
+{
+    return this->master_id;
+}
+
 

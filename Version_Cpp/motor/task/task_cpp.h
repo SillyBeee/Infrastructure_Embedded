@@ -7,6 +7,7 @@
 #include "cmsis_os.h"
 #include "gpio.h"
 #include "motor_dm.h"
+#include "motor_gm.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

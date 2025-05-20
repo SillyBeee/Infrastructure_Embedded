@@ -24,26 +24,6 @@ extern "C"
 #define T_MIN (-10)
 
 
-typedef enum
-{
-    MIT_MODE,
-    MIT_TORQUE_MODE,
-    POSITION_AND_SPEED_MODE,
-    SPEED_MODE,
-    NONE_MODE,
-} Motor_DM_Mode;
-
-typedef struct
-{
-    uint16_t error_code = 0;
-    float Position = 0;
-    float Speed = 0;
-    float Torque = 0;
-    int Temperature_MOS = 0;
-    int Temperature_Rotor = 0;
-} Motor_Status;
-
-
 class DM4310 final : private Motor
 {
 public:
@@ -61,6 +41,8 @@ public:
     void Speed_Msg_Send(float vel) const;
 
     void Bind_CAN(CAN_HandleTypeDef* hcan);
+    uint8_t Get_Can_ID() const;
+    uint8_t Get_Master_ID() const;
     void Set_CTL_Mode(Motor_DM_Mode mode);
     void Set_Can_ID(uint8_t can_id);
     void Set_Master_ID(uint8_t master_id);
@@ -73,7 +55,7 @@ private:
     static void DM_Error_Handler();
     void Pid_Update(float target) override;
 
-    Motor_Status status;
+    DM_Motor_Status status;
     uint8_t master_id;
     uint8_t can_id;
     Motor_DM_Mode mode;
