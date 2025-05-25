@@ -36,12 +36,13 @@ public:
     PID pid_speed ;
     PID pid_angle ;
     uint8_t status_buffer[8] = {0};
+    GM_Motor_Status status;
 private:
     static void GM_Error_Handler();
     void Pid_Update(float target) override;
 
 
-    GM_Motor_Status status;
+
     Motor_GM_Mode mode;
     uint8_t id;
     //继承来的私有变量
@@ -50,10 +51,10 @@ private:
 
 };
 
-inline void Send_ElectricCurrent_CTL_Message_Low(CAN_HandleTypeDef* hcan, int var1, int var2, int var3, int var4);
-inline void Send_Voltage_CTL_Message_Low(CAN_HandleTypeDef* hcan, int var1, int var2, int var3, int var4);
-inline void Send_ElectricCurrent_CTL_Message_High(CAN_HandleTypeDef* hcan, int var1, int var2, int var3);
-inline void Send_Voltage_CTL_Message_High(CAN_HandleTypeDef* hcan, int var1, int var2, int var3);
+inline void Send_ElectricCurrent_CTL_Message_Low(CAN_HandleTypeDef* hcan, int16_t var1, int16_t var2, int16_t var3, int16_t var4);
+inline void Send_Voltage_CTL_Message_Low(CAN_HandleTypeDef* hcan, int16_t var1, int16_t var2, int16_t var3, int16_t var4);
+inline void Send_ElectricCurrent_CTL_Message_High(CAN_HandleTypeDef* hcan, int16_t var1, int16_t var2, int16_t var3);
+inline void Send_Voltage_CTL_Message_High(CAN_HandleTypeDef* hcan, int16_t var1, int16_t var2, int16_t var3);
 
 
 inline void GM_Msg_Send( GM6020* motors , int motor_num , CAN_HandleTypeDef* hcan)
@@ -62,21 +63,27 @@ inline void GM_Msg_Send( GM6020* motors , int motor_num , CAN_HandleTypeDef* hca
     {
         return;
     }
-    int low_outputs[4] = {0}, high_outputs[3] = {0};
+    int16_t low_outputs[4] = {0}, high_outputs[3] = {0};
     int low_count = 0, high_count = 0;
 
     for (int i = 0; i < motor_num; ++i) {
         uint8_t id = motors[i].id;
-        float pid_output = motors[i].pid_speed.Get_Output();
+        auto pid_output =static_cast<int16_t>(motors[i].pid_speed.Get_Output());
+        if (pid_output == 0)
+        {
+            HAL_GPIO_WritePin(GPIOH , GPIO_PIN_10,GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOH , GPIO_PIN_11,GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOH , GPIO_PIN_12,GPIO_PIN_RESET);
+        }
         //错误处理
         if (motors[i].hcan != hcan){
             motors[i].GM_Error_Handler();
             return;
         }
-        if (id >= 1 && id <= 4 && low_count < 4) {
+        if (id >= 1 && id <= 4 && low_count <= 4) {
             low_outputs[id-1] = pid_output;
             low_count++;
-        } else if (id >= 5 && id <= 7 && high_count < 3) {
+        } else if (id >= 5 && id <= 7 && high_count <= 3) {
             high_outputs[id-5] = pid_output;
             high_count++;
         }
@@ -111,7 +118,7 @@ inline void GM_Msg_Send( GM6020* motors , int motor_num , CAN_HandleTypeDef* hca
 
 
 
-inline void Send_Voltage_CTL_Message_Low(CAN_HandleTypeDef* hcan,int var1 , int var2 , int var3 ,int var4)
+inline void Send_Voltage_CTL_Message_Low(CAN_HandleTypeDef* hcan, const int16_t var1 , const int16_t var2 , const int16_t var3 , const int16_t var4)
 {
 
     //错误处理
@@ -147,7 +154,7 @@ inline void Send_Voltage_CTL_Message_Low(CAN_HandleTypeDef* hcan,int var1 , int 
 
 }
 
-inline void Send_Voltage_CTL_Message_High(CAN_HandleTypeDef* hcan,int var1 , int var2 , int var3 )
+inline void Send_Voltage_CTL_Message_High(CAN_HandleTypeDef* hcan,int16_t var1 , int16_t var2 , int16_t var3 )
 {
     //错误处理
     if (var1 > GM6020_MAX_VOLTAGE || var1 < -GM6020_MAX_VOLTAGE ||
@@ -173,10 +180,10 @@ inline void Send_Voltage_CTL_Message_High(CAN_HandleTypeDef* hcan,int var1 , int
     tx_data[6] = 0; // 填充NULL数据
     tx_data[7] = 0; // 填充NULL数据
 
-    HAL_CAN_AddTxMessage(hcan, &tx_header, tx_data, &tx_mailbox);
+    if (HAL_CAN_AddTxMessage(hcan, &tx_header, tx_data, &tx_mailbox) == HAL_OK){}
 }
 
-inline void Send_ElectricCurrent_CTL_Message_Low(CAN_HandleTypeDef* hcan,int var1 , int var2 , int var3 ,int var4)
+inline void Send_ElectricCurrent_CTL_Message_Low(CAN_HandleTypeDef* hcan,int16_t var1 , int16_t var2 , int16_t var3 ,int16_t var4)
 {
     //错误处理
     if (var1 > GM6020_MAX_CURRENT || var1 < -GM6020_MAX_CURRENT ||
@@ -187,6 +194,7 @@ inline void Send_ElectricCurrent_CTL_Message_Low(CAN_HandleTypeDef* hcan,int var
     }
     CAN_TxHeaderTypeDef tx_header;
     tx_header.StdId = GM6020_CURRENT_LOW_STDID;
+    // tx_header.StdId = 0x1FE;
     tx_header.IDE = CAN_ID_STD;
     tx_header.RTR = CAN_RTR_DATA;
     tx_header.DLC = 8;
@@ -202,11 +210,16 @@ inline void Send_ElectricCurrent_CTL_Message_Low(CAN_HandleTypeDef* hcan,int var
     tx_data[6] = var4 >> 8;
     tx_data[7] = var4 & 0xFF;
 
-    HAL_CAN_AddTxMessage(hcan, &tx_header, tx_data, &tx_mailbox);
+    if (HAL_CAN_AddTxMessage(hcan, &tx_header, tx_data, &tx_mailbox) == HAL_OK)
+    {
+        HAL_GPIO_WritePin(GPIOH , GPIO_PIN_10,GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOH , GPIO_PIN_11,GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOH , GPIO_PIN_12,GPIO_PIN_RESET);
+    }
 }
 
 
-inline void Send_ElectricCurrent_CTL_Message_High(CAN_HandleTypeDef* hcan,int var1 , int var2 , int var3 )
+inline void Send_ElectricCurrent_CTL_Message_High(CAN_HandleTypeDef* hcan,int16_t var1 , int16_t var2 , int16_t var3 )
 {
     //错误处理
     if (var1 > GM6020_MAX_CURRENT || var1 < -GM6020_MAX_CURRENT ||
@@ -231,7 +244,8 @@ inline void Send_ElectricCurrent_CTL_Message_High(CAN_HandleTypeDef* hcan,int va
     tx_data[6] = 0; // 填充NULL数据
     tx_data[7] = 0; // 填充NULL数据
 
-    HAL_CAN_AddTxMessage(hcan, &tx_header, tx_data, &tx_mailbox);
+
+    if (HAL_CAN_AddTxMessage(hcan, &tx_header, tx_data, &tx_mailbox) == HAL_OK){}
 }
 
 #endif //MOTOR_GM_H

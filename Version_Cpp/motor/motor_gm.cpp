@@ -54,8 +54,8 @@ void GM6020::Pid_Update(float target)
     }
     else if (this->pid_type == POSITION_LOOP)
     {
-        float current_pos  = (this->status.Position/GM6020_MAX_POSITION)*2*M_PI;
-        float target_pos = (target/GM6020_MAX_POSITION)*2*M_PI;
+        float current_pos  = (this->status.Position*1.0/GM6020_MAX_POSITION)*2*M_PI;
+        float target_pos = (target*1.0/GM6020_MAX_POSITION)*2*M_PI;
         this->pid_angle.Pid_Update(current_pos , target_pos);
         this->pid_speed.Pid_Update(this->status.Speed,this->pid_angle.Get_Output());
     }

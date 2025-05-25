@@ -29,10 +29,10 @@ typedef enum
 
 typedef struct
 {
-    int  Position = 0;
-    int Speed = 0;
-    int Current = 0;
-    int Temperature = 0;
+    int16_t  Position = 0;
+    int16_t Speed = 0;
+    int16_t Current = 0;
+    int8_t Temperature = 0;
 
 }GM_Motor_Status;
 
