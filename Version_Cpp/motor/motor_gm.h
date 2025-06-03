@@ -21,16 +21,14 @@ extern "C"
 class GM6020 final : private Motor
 {
 public:
-    explicit GM6020(Motor_GM_Mode mode = CURRENT_CTL , CAN_HandleTypeDef* hcan = &hcan1, uint8_t id = 1, Pid_Type pid_type = NONE_PID);
+    explicit GM6020(Motor_CTL_Method mode = CURRENT_CTL , CAN_HandleTypeDef* hcan = &hcan1, uint8_t id = 1, Pid_Type pid_type = NONE_PID);
     void Set_Angle(float angle , float speed ) override;
     void Set_Speed(float speed) override;
     void Set_Pid_Type(Pid_Type pid_type) override;
     void Set_ID(uint8_t id);
     
     void Deserialize_Status(const uint8_t* status_buffer);
-
-    void Bind_CAN(CAN_HandleTypeDef* hcan);
-    void Set_CTL_Mode(Motor_GM_Mode mode);
+    void Set_CTL_Mode(Motor_Mode mode);
     uint8_t Get_ID() const;
     friend void GM_Msg_Send( GM6020* motors , int motor_num ,CAN_HandleTypeDef* hcan);
     PID pid_speed ;
@@ -43,7 +41,7 @@ private:
 
 
 
-    Motor_GM_Mode mode;
+    Motor_CTL_Method mode;
     uint8_t id;
     //继承来的私有变量
     Pid_Type pid_type;

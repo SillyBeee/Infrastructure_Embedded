@@ -1,6 +1,6 @@
 #include "motor_gm.h"
 
-GM6020::GM6020(Motor_GM_Mode mode, CAN_HandleTypeDef* hcan,uint8_t id, Pid_Type pid_type):pid_speed(0.0f, 0.0f, 0.0f, 0.001f, 0.0f),
+GM6020::GM6020(Motor_CTL_Method mode, CAN_HandleTypeDef* hcan,uint8_t id, Pid_Type pid_type):pid_speed(0.0f, 0.0f, 0.0f, 0.001f, 0.0f),
       pid_angle(0.0f, 0.0f, 0.0f, 0.001f, 0.0f)
 {
     this->pid_type  = pid_type;
@@ -72,15 +72,12 @@ void GM6020::GM_Error_Handler()
 
 }
 
-void GM6020::Set_CTL_Mode(Motor_GM_Mode mode)
+void GM6020::Set_CTL_Mode(Motor_Mode mode)
 {
     this->mode = mode;
 }
 
-void GM6020::Bind_CAN(CAN_HandleTypeDef* hcan)
-{
-    this->hcan = hcan;
-}
+
 
 void GM6020::Set_Pid_Type(Pid_Type pid_type)
 {

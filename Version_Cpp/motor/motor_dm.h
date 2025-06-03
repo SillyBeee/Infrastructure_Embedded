@@ -27,7 +27,7 @@ extern "C"
 class DM4310 final : private Motor
 {
 public:
-    explicit DM4310(Motor_DM_Mode mode = NONE_MODE, CAN_HandleTypeDef* hcan = &hcan1, uint8_t can_id = 0, uint8_t master_id = 0 , Pid_Type pid_type = NONE_PID);
+    explicit DM4310(Motor_Mode mode = NONE_MODE, CAN_HandleTypeDef* hcan = &hcan1, uint8_t can_id = 0, uint8_t master_id = 0 , Pid_Type pid_type = NONE_PID);
     void Set_Angle(float angle , float speed ) override;
     void Set_Speed(float speed) override;
 
@@ -40,10 +40,9 @@ public:
     void Pos_Speed_Msg_Send(float pos , float vel) const;
     void Speed_Msg_Send(float vel) const;
 
-    void Bind_CAN(CAN_HandleTypeDef* hcan);
     uint8_t Get_Can_ID() const;
     uint8_t Get_Master_ID() const;
-    void Set_CTL_Mode(Motor_DM_Mode mode);
+    void Set_CTL_Mode(Motor_Mode mode);
     void Set_Can_ID(uint8_t can_id);
     void Set_Master_ID(uint8_t master_id);
     void Set_Pid_Type(Pid_Type pid_type) override;
@@ -58,7 +57,7 @@ private:
     DM_Motor_Status status;
     uint8_t master_id;
     uint8_t can_id;
-    Motor_DM_Mode mode;
+    Motor_Mode mode;
 
     //继承来的私有变量
     Pid_Type pid_type;
@@ -66,7 +65,7 @@ private:
 
 };
 
- inline float uint_to_float(const int x_int , const float x_min , const float x_max , const int bits)
+static float uint_to_float(const int x_int , const float x_min , const float x_max , const int bits)
 {
     /// converts unsigned int to float, given range and number of bits ///
     const float span = x_max - x_min;
@@ -74,7 +73,7 @@ private:
     return (static_cast<float>(x_int)*span/static_cast<float>((1 << bits) - 1)) + offset;
 }
 
-inline int float_to_uint(const float x, const float x_min, const float x_max, const int bits){
+static int float_to_uint(const float x, const float x_min, const float x_max, const int bits){
     /// Converts a float to an unsigned int, given range and number of bits
     const float span = x_max - x_min;
     const float offset = x_min;

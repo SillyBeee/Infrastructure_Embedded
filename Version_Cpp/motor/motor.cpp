@@ -19,3 +19,8 @@ Motor::~Motor()
 {
 
 }
+
+void Motor::Bind_CAN(CAN_HandleTypeDef* hcan)
+{
+    this->hcan = hcan;
+}

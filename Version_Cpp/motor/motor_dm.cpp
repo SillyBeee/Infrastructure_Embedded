@@ -5,7 +5,7 @@
 
 #include <bits/this_thread_sleep.h>
 
-DM4310::DM4310(const Motor_DM_Mode mode, CAN_HandleTypeDef* hcan, const uint8_t can_id, const uint8_t master_id , const Pid_Type pid_type) :
+DM4310::DM4310(const Motor_Mode mode, CAN_HandleTypeDef* hcan, const uint8_t can_id, const uint8_t master_id , const Pid_Type pid_type) :
       pid_speed(0.0f, 0.0f, 0.0f, 0.001f, 0.0f),
       pid_angle(0.0f, 0.0f, 0.0f, 0.001f, 0.0f)
 {
@@ -320,15 +320,11 @@ void DM4310::Set_Master_ID(uint8_t master_id)
     this->master_id = master_id;
 }
 
-void DM4310::Set_CTL_Mode(Motor_DM_Mode mode)
+void DM4310::Set_CTL_Mode(Motor_Mode mode)
 {
     this->mode = mode;
 }
 
-void DM4310::Bind_CAN(CAN_HandleTypeDef* hcan)
-{
-    this->hcan = hcan;
-}
 
 void DM4310::Set_Pid_Type(const Pid_Type pid_type)
 {

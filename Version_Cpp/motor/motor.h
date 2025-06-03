@@ -23,7 +23,7 @@ typedef enum
 {
     VOLTAGE_CTL,
     CURRENT_CTL,
-}Motor_GM_Mode;
+}Motor_CTL_Method;
 
 
 
@@ -44,7 +44,8 @@ typedef enum
     POSITION_AND_SPEED_MODE,
     SPEED_MODE,
     NONE_MODE,
-} Motor_DM_Mode;
+} Motor_Mode;
+
 
 
 typedef struct
@@ -70,11 +71,13 @@ public:
 
     virtual ~Motor() = 0;
 
+    void Bind_CAN(CAN_HandleTypeDef* hcan);
 
 
 
-private:
+protected:
     Pid_Type pid_type;
+    CAN_HandleTypeDef* hcan;
 
 
 
