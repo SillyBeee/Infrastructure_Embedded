@@ -3,9 +3,10 @@
 #include "pid.h"
 #include "cstdint"
 #include "can.h"
+
+#include "RTT_Logger.h"
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 #ifdef __cplusplus
 }
@@ -17,24 +18,22 @@ typedef enum
     NONE_PID,
     SPEED_LOOP,
     POSITION_LOOP,
-}Pid_Type;
+} Pid_Type;
 
 typedef enum
 {
     VOLTAGE_CTL,
     CURRENT_CTL,
-}Motor_CTL_Method;
-
+} Motor_CTL_Method;
 
 
 typedef struct
 {
-    int16_t  Position = 0;
+    int16_t Position = 0;
     int16_t Speed = 0;
     int16_t Current = 0;
     int8_t Temperature = 0;
-
-}GM_Motor_Status;
+} GM_Motor_Status;
 
 
 typedef enum
@@ -45,7 +44,6 @@ typedef enum
     SPEED_MODE,
     NONE_MODE,
 } Motor_Mode;
-
 
 
 typedef struct
@@ -63,7 +61,7 @@ class Motor
 {
 public:
     Motor();
-    virtual void Set_Angle(float angle , float speed = 0) = 0;
+    virtual void Set_Angle(float angle, float speed = 0) = 0;
     virtual void Set_Speed(float speed) = 0;
     virtual void Pid_Update(float target) = 0;
 
@@ -73,19 +71,9 @@ public:
 
     void Bind_CAN(CAN_HandleTypeDef* hcan);
 
-
-
 protected:
     Pid_Type pid_type;
     CAN_HandleTypeDef* hcan;
-
-
-
-
 };
-
-
-
-
 
 #endif //MOTOR_H
