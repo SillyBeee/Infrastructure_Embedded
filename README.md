@@ -11,6 +11,8 @@
 ###### 常见手搓算法
 - Transform
 - thread_pool
+###### 超脚爷的机器人学解算
+- Robotics
 ###### 嵌入式(C/Cpp)外设库
 
 - 蜂鸣器
