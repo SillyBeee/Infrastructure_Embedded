@@ -8,9 +8,29 @@ static void Encoder_Decode(CanInstance_s *can_instance) {
    if(encoder == NULL) {
       return;
    }
-   ''
+
+
+
 }
 
+
+bool Send_Encoder_Refresh_Request(EncoderInstance_s* encoder) {
+   if (encoder != NULL && encoder->can_instance != NULL) {
+       encoder->can_instance->tx_id = 0x01;
+       encoder->can_instance->tx_header.DLC = 4;
+       memset(encoder->can_instance->tx_buff,0,sizeof(encoder->can_instance->tx_buff));
+       encoder->can_instance->tx_buff[0] = 0x04;
+       encoder->can_instance->tx_buff[1] = 0x01;
+       encoder->can_instance->tx_buff[2] = 0x01;
+       encoder->can_instance->tx_buff[3] = 0x00;
+       if (Can_Transmit(encoder->can_instance)) {
+          return true;
+       }
+       return false;
+   }
+    return false;
+    Log_Error("%s : Encoder Send Request Failed", encoder->topic_name);
+}
 
 EncoderInstance_s *Encoder_Register(const EncoderInitConfig_s* config) {
    if (config ==NULL) {
@@ -46,6 +66,4 @@ bool Encoder_Angle_Refresh(EncoderInstance_s* instance) {
 
 }
 
-bool Send_Encoder_Refresh_Request() {
 
-}
