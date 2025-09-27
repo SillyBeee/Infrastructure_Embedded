@@ -1,0 +1,51 @@
+#include "encoder.h"
+#include <string.h>
+static void Encoder_Decode(CanInstance_s *can_instance) {
+   if(can_instance == NULL){
+      return;
+   }
+   EncoderInstance_s *encoder = (EncoderInstance_s *)can_instance->parent_ptr;
+   if(encoder == NULL) {
+      return;
+   }
+   ''
+}
+
+
+EncoderInstance_s *Encoder_Register(const EncoderInitConfig_s* config) {
+   if (config ==NULL) {
+      return NULL;
+   }
+   EncoderInstance_s* instance = user_malloc(sizeof(EncoderInstance_s));
+   memset(instance, 0, sizeof(EncoderInstance_s)); // 清空内存
+   if (instance == NULL) {
+      Log_Error("%s : Encoder Register Failed, No Memory", config->topic_name);
+      return NULL;
+   }
+   instance->topic_name = config->topic_name;
+   instance->encoder_address = config->encoder_address;
+   instance->is_auto_refresh = config->is_auto_refresh;
+   instance->refresh_time = config->refresh_time;
+
+   // 注册编码器到CAN总线
+   config->can_config->topic_name = config->topic_name;
+   config->can_config->rx_id = 0x01;
+   config->can_config->tx_id = 0x01;
+   config->can_config->parent_ptr = instance;
+
+   instance->angle = 0;
+   return instance;
+}
+
+bool Encoder_Angle_Refresh(EncoderInstance_s* instance) {
+   if (instance == NULL) {
+      Log_Error("Encoder Refresh Failed: Instance NULL");
+      return false;
+   }
+
+
+}
+
+bool Send_Encoder_Refresh_Request() {
+
+}
