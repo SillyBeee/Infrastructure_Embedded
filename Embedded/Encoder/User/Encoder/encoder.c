@@ -1,6 +1,6 @@
 #include "encoder.h"
 #include <string.h>
-#include "portable.h"
+// #include "portable.h"
 
 static void Encoder_Decode(CanInstance_s *can_instance) {
    if(can_instance == NULL){
@@ -71,7 +71,7 @@ EncoderInstance_s *Encoder_Register(const EncoderInitConfig_s* config) {
    config->can_config->can_module_callback = Encoder_Decode;
    encoder_instance->can_instance = Can_Register(config->can_config);
    if (encoder_instance->can_instance == NULL) {
-      vPortFree(encoder_instance);
+      user_free(encoder_instance);
       return NULL;
    }
 

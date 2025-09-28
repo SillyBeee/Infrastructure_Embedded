@@ -25,11 +25,15 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bsp_can.h"
-#include "RTT_Logger.h"
+// #include "RTT_Logger.h"
+#include "encoder.h"
+#include "FreeRTOS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+
 CanInstance_s* can1;
 CanInitConfig_s can1_config = {
   .topic_name = "can1",
@@ -38,7 +42,13 @@ CanInitConfig_s can1_config = {
   .rx_id = 0x01,
 };
 
-
+EncoderInstance_s* encoder;
+EncoderInitConfig_s encoder_config = {
+.topic_name = "encoder1",
+.encoder_address = 0x01,
+.can_config = &can1_config,
+.is_auto_refresh = false,
+.refresh_time = 100,};
 
 /* USER CODE END PTD */
 
@@ -68,6 +78,15 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void encoder_task(void const * argument){
+  while (1)
+  {
+    if (encoder!=NULL)
+    {
+      Encoder_Angle_Refresh(encoder);
+    }
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -101,11 +120,9 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
-
-  can1 = Can_Register(&can1_config);
-  if (can1 == NULL) {
-     LOG("can init failed");
-    while (1);
+  encoder = Encoder_Register(&encoder_config);
+  if (encoder == NULL) {
+    Log_Error("Encoder Register Failed");
   }
 
   /* USER CODE END 2 */
@@ -152,7 +169,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLN = 84;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -169,7 +186,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
