@@ -30,7 +30,7 @@ typedef struct _EncoderInstance_s {
     bool is_auto_refresh;
     int refresh_time;
 
-    int angle;  //解码角度值
+    double angle;  //解码角度值
 } EncoderInstance_s;
 
 

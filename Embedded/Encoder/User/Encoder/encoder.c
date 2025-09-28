@@ -1,5 +1,7 @@
 #include "encoder.h"
 #include <string.h>
+#include "portable.h"
+
 static void Encoder_Decode(CanInstance_s *can_instance) {
    if(can_instance == NULL){
       return;
@@ -8,8 +10,22 @@ static void Encoder_Decode(CanInstance_s *can_instance) {
    if(encoder == NULL) {
       return;
    }
-
-
+   const int length = can_instance->rx_buff[0];
+   if (length!= 0x07) {
+      //如果长度不为7,则不是角度返回值
+      return;
+   }
+   int address = can_instance->rx_buff[1];
+   if (address != encoder->encoder_address) {
+      return;
+   }
+   int function = can_instance->rx_buff[2];
+   uint32_t data =
+      can_instance->rx_buff[6]<<24 |
+      can_instance->rx_buff[5]<<16 |
+      can_instance->rx_buff[4] <<8 |
+      can_instance->rx_buff[3];
+   encoder->angle = data*360/1024.0;
 
 }
 
@@ -36,25 +52,31 @@ EncoderInstance_s *Encoder_Register(const EncoderInitConfig_s* config) {
    if (config ==NULL) {
       return NULL;
    }
-   EncoderInstance_s* instance = user_malloc(sizeof(EncoderInstance_s));
-   memset(instance, 0, sizeof(EncoderInstance_s)); // 清空内存
-   if (instance == NULL) {
+   EncoderInstance_s* encoder_instance = user_malloc(sizeof(EncoderInstance_s));
+   memset(encoder_instance, 0, sizeof(EncoderInstance_s)); // 清空内存
+   if (encoder_instance == NULL) {
       Log_Error("%s : Encoder Register Failed, No Memory", config->topic_name);
       return NULL;
    }
-   instance->topic_name = config->topic_name;
-   instance->encoder_address = config->encoder_address;
-   instance->is_auto_refresh = config->is_auto_refresh;
-   instance->refresh_time = config->refresh_time;
+   encoder_instance->topic_name = config->topic_name;
+   encoder_instance->encoder_address = config->encoder_address;
+   encoder_instance->is_auto_refresh = config->is_auto_refresh;
+   encoder_instance->refresh_time = config->refresh_time;
 
    // 注册编码器到CAN总线
    config->can_config->topic_name = config->topic_name;
    config->can_config->rx_id = 0x01;
    config->can_config->tx_id = 0x01;
-   config->can_config->parent_ptr = instance;
+   config->can_config->parent_ptr = encoder_instance;
+   config->can_config->can_module_callback = Encoder_Decode;
+   encoder_instance->can_instance = Can_Register(config->can_config);
+   if (encoder_instance->can_instance == NULL) {
+      vPortFree(encoder_instance);
+      return NULL;
+   }
 
-   instance->angle = 0;
-   return instance;
+   encoder_instance->angle = 0;
+   return encoder_instance;
 }
 
 bool Encoder_Angle_Refresh(EncoderInstance_s* instance) {
@@ -62,6 +84,7 @@ bool Encoder_Angle_Refresh(EncoderInstance_s* instance) {
       Log_Error("Encoder Refresh Failed: Instance NULL");
       return false;
    }
+   Send_Encoder_Refresh_Request(instance);
 
 
 }
