@@ -1,12 +1,133 @@
+/**
+* @file judgement_dev.h
+ * @author Ma HuaCheng
+ * @brief 裁判系统通信模块
+ * @version 0.1
+ * @details 提供裁判系统数据的接收与解析功能(该代码基于RoboMaster裁判系统串口协议V1.8.0 2025.4 进行开发)
+ * @date 2025-10-01
+ * @update 2025-10-06
+ * @copyright  Copyright (c) 2025 HDU—PHOENIX
+ * @todo
+ */
 #ifndef JUDGEMENT_H
 #define JUDGEMENT_H
+#define _packed __attribute__((packed))
 #include <stdint.h>
 
-#define _packed __attribute__((packed))
+#define Referee_UART huart6
+#define Referee_IRQHandler USART6_IRQHandler
+
+#define   HEADER_SOF 0xA5 //帧头起始字节
+#define   REF_PROTOCOL_HEADER_SIZE 	  5				//帧头长
+#define   REF_PROTOCOL_CRC16_SIZE     2       //命令码长度
+#define   REF_PROTOCOL_TAIL_SIZE      2	      //帧尾CRC16
+#define   REF_DATA_ERROR      0
+#define   REF_DATA_CORRECT    1
+#define REF_USART_RX_BUF_LENTH 512
+#define REF_FIFO_BUF_LENGTH     1024
+#define REF_PROTOCOL_FRAME_MAX_SIZE 128
+#define REF_HEADER_CRC_LEN          (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE)
+#define REF_HEADER_CRC_CMDID_LEN    (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE + sizeof(uint16_t))
+#define REF_HEADER_CMDID_LEN        (REF_PROTOCOL_HEADER_SIZE + sizeof(uint16_t))
+
+
+
+extern uint8_t Judge_Self_ID;//当前机器人的ID
+extern uint16_t Judge_SelfClient_ID;//发送者机器人对应的客户端ID
+
+#define Robot_ID_Red_Hero         1 //红方英雄
+#define Robot_ID_Red_Engineer     2 //红方工程
+#define Robot_ID_Red_Infantry3    3 //红方步兵3
+#define Robot_ID_Red_Infantry4    4 //红方步兵4
+#define Robot_ID_Red_Infantry5    5 //红方步兵5
+#define Robot_ID_Red_Aerial       6 //红方无人机
+#define Robot_ID_Red_Sentry       7 //红方哨兵
+#define Robot_ID_Red_Darts        8 //红方飞镖
+#define Robot_ID_Red_Radar        9 //红方雷达
+#define Robot_ID_Red_Outpost     10 //红方前哨站
+#define Robot_ID_Red_Base        11 //红方基地
+#define Robot_ID_Blue_Hero      101 //蓝方英雄
+#define Robot_ID_Blue_Engineer  102 //蓝方工程
+#define Robot_ID_Blue_Infantry3 103 //蓝方步兵3
+#define Robot_ID_Blue_Infantry4 104 //蓝方步兵4
+#define Robot_ID_Blue_Infantry5 105 //蓝方步兵5
+#define Robot_ID_Blue_Aerial    106 //蓝方无人机
+#define Robot_ID_Blue_Sentry    107 //蓝方哨兵
+#define Robot_ID_Blue_Darts     108 //蓝方飞镖
+#define Robot_ID_Blue_Radar     109 //蓝方雷达
+#define Robot_ID_Blue_Outpost   110 //红方前哨站
+#define Robot_ID_Blue_Base      111 //红方基地
+
+
+typedef _packed struct
+{   //帧头格式
+    uint8_t SOF;
+    uint16_t Data_Length;
+    uint8_t Seq;
+    uint8_t CRC8;
+} frame_header_t;
+
+typedef enum
+{   //帧内关键块的起始字节位置
+    FRAME_HEADER         = 0,
+    CMD_ID               = 5,
+    DATA                 = 7,
+    STU_HEADER					 = 7,
+    STU_DATA             = 13
+} JudgeFrameOffset;
+
+typedef enum
+{   //帧头内部字段的起始字节位置
+    SOF          = 0,//起始位
+    DATA_LENGTH  = 1,//帧内数据长度,根据这个来获取数据长度
+    SEQ          = 3,//包序号
+    CRC8         = 4 //帧头CRC8校验
+} FrameHeaderOffset;
+
+
+
+typedef enum
+{   //各命令ID
+    GAME_STATE_CMD_ID                 = 0x0001,  //比赛状态数据 常规链路 数据长度:11 1Hz 所有机器人可接收
+    GAME_RESULT_CMD_ID                = 0x0002,  //比赛结果数据 常规链路 数据长度:1 仅在比赛结束后发送 所有机器人可接收
+    GAME_ROBOT_HP_CMD_ID              = 0x0003,  //机器人血量数据 常规链路 数据长度:32 3Hz 所有机器人可接收
+
+    FIELD_EVENTS_CMD_ID               = 0x0101,  //场地事件数据 常规链路 数据长度:4 1Hz 所有机器人可接收
+    REFEREE_WARNING_CMD_ID            = 0x0104,  //裁判警告信息 常规链路 数据长度:3 仅在违规时发送,其余时间1Hz 所有机器人可接收
+    DART_REMAINING_TIME_CMD_ID        = 0x0105,  //飞镖发射相关数据 常规链路 数据长度:3 1Hz 所有机器人可接收
+
+    ROBOT_STATE_CMD_ID                = 0x0201,  //机器人性能体系数据 常规链路 数据长度:13 10Hz 对应机器人可接收
+    POWER_HEAT_DATA_CMD_ID            = 0x0202,  //实时底盘缓冲能量和射击热量数据 常规链路 数据长度:16 10Hz 对应机器人可接收
+    ROBOT_POS_CMD_ID                  = 0x0203,  //机器人位置数据 常规链路 数据长度:16 1Hz 对应机器人可接收
+    BUFF_MUSK_CMD_ID                  = 0x0204,  //机器人增益与底盘能量数据 常规链路 数据长度:7 3Hz 对应机器人可接收
+    ROBOT_HURT_CMD_ID                 = 0x0206,  //伤害状态数据 常规链路 数据长度:1 发生伤害后发送 对应机器人可接收
+    SHOOT_DATA_CMD_ID                 = 0x0207,  //实时射击信息 常规链路 数据长度:7 弹丸发射后发送 对应机器人可接收
+    BULLET_REMAINING_CMD_ID           = 0x0208,  //子弹剩余发射数 常规链路 数据长度:6 10Hz 对应机器人可接收(除工程)
+    ROBOT_RFID_STATE_CMD_ID           = 0x0209,  //机器人RFID状态 常规链路 数据长度:4 3Hz 装RFID机器人可接收
+    DART_CLIENT_CMD_ID                = 0x020A,  //飞镖机器人客户端指令数据 常规链路 数据长度:6 3Hz 飞镖可接收
+    ROBOT_POSITION_DM_ID              = 0x020B,  //地面机器人位置数据 常规链路 数据长度:40 1Hz 哨兵可接收
+    LIDAR_PROGRESS_CMD_ID             = 0x020C,  //雷达标记进度数据 常规链路 数据长度:1 1Hz 雷达可接收
+    SENTRY_INFO_CMD_ID                = 0x020D,  //哨兵自主决策信息同步 常规链路 数据长度:6 1Hz 哨兵可接收
+    LIDAR_INFO_CMD_ID                 = 0x020E,  //雷达自主决策信息同步 常规链路 数据长度:1 1Hz 雷达可接收
+
+
+    STUDENT_INTERACTIVE_DATA_CMD_ID   = 0x0301,  //机器人交互数据 常规链路 数据长度:127 发送方触发,最大30Hz
+    CUSTOM_CONTROLLER_DATA_CMD_ID     = 0x0302,  //自定义控制器与机器人交互数据 图传链路 数据长度:30 发送方触发,最大30Hz 自定义控制器对应客户端绑定机器人接收
+    ROBOT_COMMAND_CMD_ID              = 0x0303,  //小地图下发信息标识 常规链路 数据长度:15 选手端触发发送 选手端选择的机器人接收
+    KEYBOARD_MOUSE_DATA_CMD_ID        = 0x0304,  //键鼠数据 图传链路 数据长度:12 30Hz 选手端图传绑定的机器人接收
+    CLIENT_MAP_COMMAND_CMD_ID         = 0x0305,  //小地图接收雷达信息标识 常规链路 数据长度:24 上限5Hz 所有选手端可接收
+    CLIENT_CUSTOM_CONTROLLER_DATA_CMD_ID = 0x0306, //自定义控制器与选手端交互数据  数据长度:8 发送方触发,最大30Hz 自定义控制器对应选手端接收
+    CLIENT_MAP_PATH_DATA_CMD_ID        = 0x0307, //选手端小地图接受路径数据 常规链路 数据长度:103 最大1Hz 哨兵选手客户端可接收
+    CLIENT_ROBOT_INFO_CMD_ID           = 0x0308, //选手端小地图接受机器人信息 常规链路 数据长度:34 最大3Hz 所有选手端可接收
+    CUSTOM_CONTROLLER_RECEIVED_DATA_CMD_ID = 0x0309, //自定义控制器接收机器人数据 图传链路 数据长度:30 最大10Hz 自定义控制器接收
+    IDCustomData,
+}referee_cmd_id_e;
+
+
 
 typedef _packed struct
 {
-    //Command 0x0001
+    //Command 0x0001 比赛状态数据
     uint8_t game_type :4;     //1:对抗赛 2:单项赛 3:人工智能赛 4:联盟赛 5:步兵对抗赛
     uint8_t game_progress :4;  //0:未开始 1:准备阶段 2:自检阶段 3:5秒倒计时 4:比赛中 5:比赛结算中
     uint16_t stage_remaining_time; //当前阶段剩余时间，单位秒
@@ -14,12 +135,12 @@ typedef _packed struct
 }game_status_t;
 
 typedef _packed struct
-{   //Command 0x0002
+{   //Command 0x0002 比赛结果数据
     uint8_t winner;  //0:平局 1:红方获胜 2:蓝方获胜
 }game_result_t;
 
 typedef _packed struct
-{   //Command 0x0003
+{   //Command 0x0003  机器人血量数据
     uint16_t red_1_robot_HP; //红方1号机器人血量
     uint16_t red_2_robot_HP; //红方2号机器人血量
     uint16_t red_3_robot_HP; //红方3号机器人血量
@@ -39,25 +160,25 @@ typedef _packed struct
 }game_robot_HP_t;
 
 typedef _packed struct
-{   //Command 0x0101
+{   //Command 0x0101  场地事件数据
     uint32_t event_data;
 }event_data_t;
 
 typedef _packed struct
-{   //Command 0x0104
+{   //Command 0x0104 裁判警告信息
     uint8_t level;  //受罚等级 1:双方黄牌 2.黄牌 3.红牌 4.判负
     uint8_t offending_robot_id; //己方受罚机器人ID，判负和双方黄牌值为0
     uint8_t count; //己方最后一次受到判罚的违规机器人对应判罚等级的违规次数
 }referee_warning_t;
 
 typedef _packed struct
-{   //Command 0x0105
+{   //Command 0x0105 飞镖发射相关数据
     uint8_t dart_remaining_time; //飞镖发射剩余时间，单位秒
     uint16_t dart_info;  //
 }dart_info_t;
 
 typedef _packed struct
-{   //Command 0x0201
+{   //Command 0x0201  比赛机器人状态
     uint8_t robot_id;
     uint8_t robot_level;
     uint16_t current_HP;
@@ -71,7 +192,7 @@ typedef _packed struct
 }robot_status_t;
 
 typedef _packed struct
-{   //Command 0x0202
+{   //Command 0x0202  实时功率热量数据
     uint16_t reserved1;
     uint16_t reserved2;
     float reserved3;
@@ -82,14 +203,14 @@ typedef _packed struct
 }power_heat_data_t;
 
 typedef _packed struct
-{   //Command 0x0203
+{   //Command 0x0203  机器人位置
     float x;
     float y;
     float angle;
 }robot_pos_t;
 
 typedef _packed struct
-{   //Command 0x0204
+{   //Command 0x0204  机器人增益
     uint8_t recovery_buff;
     uint8_t cooling_buff;
     uint8_t defence_buff;
@@ -99,13 +220,13 @@ typedef _packed struct
 }buff_t;
 
 typedef _packed struct
-{   //Command 0x0206
+{   //Command 0x0206  伤害状态
     uint8_t armor_id : 4;
     uint8_t HP_deduction_reason : 4;
 }hurt_data_t;
 
 typedef _packed struct
-{   //Command 0x0207
+{   //Command 0x0207  实时射击信息
     uint8_t bullet_type;
     uint8_t shooter_number;
     uint8_t launching_frequency;
@@ -113,19 +234,19 @@ typedef _packed struct
 }shoot_data_t;
 
 typedef _packed struct
-{   //Command 0x0208
+{   //Command 0x0208  子弹剩余发射数
     uint16_t projectile_allowance_17mm;
     uint16_t projectile_allowance_42mm;
     uint16_t remaining_gold_coin;
 }projectile_allowance_t;
 
 typedef _packed struct
-{   //Command 0x0209
+{   //Command 0x0209  机器人RFID状态
     uint32_t rfid_status;
 }rfid_status_t;
 
 typedef _packed struct
-{   //Command 0x020A
+{   //Command 0x020A  飞镖机器人客户端指令数据
     uint8_t dart_launch_opening_status;
     uint8_t reserved1;
     uint16_t target_change_time;
@@ -133,7 +254,7 @@ typedef _packed struct
 }dart_client_cmd_t;
 
 typedef _packed struct
-{   //Command 0x020B
+{   //Command 0x020B 地面机器人位置数据
     float hero_x;
     float hero_y;
     float engineer_x;
@@ -147,32 +268,36 @@ typedef _packed struct
 }ground_robot_position_t;
 
 typedef _packed struct
-{   //Command 0x020C
+{   //Command 0x020C  雷达标记进度数据
     uint8_t mark_progress;
 }radar_mark_data_t;
 
 typedef _packed struct
-{   //Command 0x020D
+{   //Command 0x020D  哨兵自主决策信息同步
     uint32_t sentry_info;
     uint16_t sentry_info_2;
 } sentry_info_t;
 
 typedef _packed struct
-{   //Command 0x020E
+{   //Command 0x020E  雷达自主决策信息同步
     uint8_t radar_info;
 } radar_info_t;
 
 
-
-//画UI的
 typedef _packed struct
-{   //Command 0x0301
+{   //Command 0x0301  机器人交互数据帧头
     uint16_t data_cmd_id;
     uint16_t sender_id;
     uint16_t receiver_id;
     uint8_t user_data[];
+}robot_interaction_header_t;
+
+typedef _packed struct
+{   //机器人交互帧数据
+    uint8_t * data;
 }robot_interaction_data_t;
 
+//机器人交互帧子协议
 typedef _packed struct
 {   //SubCommand 0x0100
     uint8_t delete_type;
@@ -182,8 +307,8 @@ typedef _packed struct
 typedef _packed struct
 {   //SubCommand 0x0101
     uint8_t figure_name[3];
-    uint32_t operate_tpye:3;
-    uint32_t figure_tpye:3;
+    uint32_t operate_type:3;
+    uint32_t figure_type:3;
     uint32_t layer:4;
     uint32_t color:4;
     uint32_t details_a:9;
@@ -227,11 +352,8 @@ typedef _packed struct
     uint8_t radar_cmd;
 } radar_cmd_t;
 
-
-
-
 typedef _packed struct
-{   //Command 0x0303
+{   //Command 0x0303  小地图下发信息标识
     float target_position_x;
     float target_position_y;
     uint8_t cmd_keyboard;
@@ -242,7 +364,7 @@ typedef _packed struct
 
 //选手端接收数据
 typedef _packed struct
-{   //Command 0x0305
+{   //Command 0x0305  小地图接收信息标识
     uint16_t hero_position_x;
     uint16_t hero_position_y;
     uint16_t engineer_position_x;
@@ -258,7 +380,7 @@ typedef _packed struct
 } map_robot_data_t;
 
 typedef _packed struct
-{   //Command 0x0307
+{   //Command 0x0307 选手端小地图接受路径数据
     uint8_t intention;
     uint16_t start_position_x;
     uint16_t start_position_y;
@@ -268,7 +390,7 @@ typedef _packed struct
 }map_data_t;
 
 typedef _packed struct
-{   //Command 0x0308
+{   //Command 0x0308 选手端小地图接受机器人信息
     uint16_t sender_id;
     uint16_t receiver_id;
     uint8_t user_data[30];
@@ -276,19 +398,19 @@ typedef _packed struct
 
 
 
-//图传链路相关数据
+
 typedef _packed struct
-{   //Command 0x0302
-    uint8_t data[x];
+{   //Command 0x0302  自定义控制器与机器人交互数据(机器人接收)
+    uint8_t* data;
 }custom_robot_data_t;
 
 typedef _packed struct
-{   //Command 0x0309
-    uint8_t data[x];
+{   //Command 0x0309  自定义控制器接收机器人数据(自定义控制器接收)
+    uint8_t* data;
 }robot_custom_data_t;
 
 typedef _packed struct
-{  //Command 0x0304
+{  //Command 0x0304  键鼠数据
 int16_t mouse_x;
 int16_t mouse_y;
 int16_t mouse_z;
@@ -298,9 +420,9 @@ uint16_t keyboard_value;
 uint16_t reserved;
 }remote_control_t;
 
-//非链路数据
+
 typedef _packed struct
-{   //Command 0x0306
+{   //Command 0x0306  自定义控制器与选手端交互数据
     uint16_t key_value;
     uint16_t x_position:12;
     uint16_t mouse_left:4;
@@ -308,5 +430,8 @@ typedef _packed struct
     uint16_t mouse_right:4;
     uint16_t reserved;
 }custom_client_data_t;
+
+
+
 
 #endif //JUDGEMENT_H
