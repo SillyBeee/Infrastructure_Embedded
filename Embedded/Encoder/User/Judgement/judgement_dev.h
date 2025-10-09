@@ -58,34 +58,6 @@ extern uint16_t Judge_SelfClient_ID;//发送者机器人对应的客户端ID
 #define Robot_ID_Blue_Outpost   110 //红方前哨站
 #define Robot_ID_Blue_Base      111 //红方基地
 
-
-typedef _packed struct
-{   //帧头格式
-    uint8_t SOF;
-    uint16_t Data_Length;
-    uint8_t Seq;
-    uint8_t CRC8;
-} frame_header_t;
-
-typedef enum
-{   //帧内关键块的起始字节位置
-    FRAME_HEADER         = 0,
-    CMD_ID               = 5,
-    DATA                 = 7,
-    STU_HEADER					 = 7,
-    STU_DATA             = 13
-} JudgeFrameOffset;
-
-typedef enum
-{   //帧头内部字段的起始字节位置
-    SOF          = 0,//起始位
-    DATA_LENGTH  = 1,//帧内数据长度,根据这个来获取数据长度
-    SEQ          = 3,//包序号
-    CRC8         = 4 //帧头CRC8校验
-} FrameHeaderOffset;
-
-
-
 typedef enum
 {   //各命令ID
     GAME_STATE_CMD_ID                 = 0x0001,  //比赛状态数据 常规链路 数据长度:11 1Hz 所有机器人可接收
@@ -122,6 +94,59 @@ typedef enum
     CUSTOM_CONTROLLER_RECEIVED_DATA_CMD_ID = 0x0309, //自定义控制器接收机器人数据 图传链路 数据长度:30 最大10Hz 自定义控制器接收
     IDCustomData,
 }referee_cmd_id_e;
+
+typedef enum {
+    //机器人交互数据的子命令(0x301)
+    UI_LAYER_DELETE_SUBCMD_ID      = 0x0100,      //选手端删除图层
+    UI_CREATE_ONE_SUBCMD_ID        = 0x0101,      //选手端绘制一个图形
+    UI_CREATE_TWO_SUBCMD_ID        = 0x0102,      //选手端绘制两个图形
+    UI_CREATE_FIVE_SUBCMD_ID       = 0x0103,      //选手端绘制五个图形
+    UI_CREATE_SEVEN_SUBCMD_ID      = 0x0104,      //选手端绘制七个图形
+    UI_CREATE_CHARACTER_SUBCMD_ID  = 0x0110,      //选手端绘制字符图形
+
+    DECISION_SENTRY                = 0x0120,      //哨兵自主决策指令
+    DECISION_LIDAR                 = 0x0121,      //雷达自主决策指令
+
+}referee_subcmd_id_e;
+
+
+typedef _packed struct
+{   //帧头格式
+    uint8_t SOF;
+    uint16_t Data_Length;
+    uint8_t Seq;
+    uint8_t CRC8;
+} frame_header_t;
+
+typedef _packed struct
+{   //单帧定义
+    frame_header_t frame_header;
+    uint16_t cmd_id;
+    referee_cmd_id_e data;
+    uint16_t  frame_tail;	//CRC16整包校验
+}frame_t;
+
+
+typedef enum
+{   //帧内关键块的起始字节位置
+    FRAME_HEADER         = 0,
+    CMD_ID               = 5,
+    DATA                 = 7,
+    STU_HEADER					 = 7,
+    STU_DATA             = 13
+} JudgeFrameOffset;
+
+typedef enum
+{   //帧头内部字段的起始字节位置
+    SOF          = 0,//起始位
+    DATA_LENGTH  = 1,//帧内数据长度,根据这个来获取数据长度
+    SEQ          = 3,//包序号
+    CRC8         = 4 //帧头CRC8校验
+} FrameHeaderOffset;
+
+
+
+
 
 
 
