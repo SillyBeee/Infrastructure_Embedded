@@ -1,5 +1,5 @@
 /**
-* @file judgement_dev.c
+* @file referee_dev.c
  * @author Ma HuaCheng
  * @brief 裁判系统通信模块
  * @version 0.1
@@ -11,4 +11,9 @@
  */
 
 
-#include "judgement_dev.h"
+#include "referee_dev.h"
+
+
+
+extern uint8_t Referee_Self_ID;//当前机器人的ID
+extern uint16_t Referee_SelfClient_ID;//发送者机器人对应的客户端ID

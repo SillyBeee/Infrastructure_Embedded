@@ -1,39 +1,16 @@
 /**
-* @file judgement_dev.h
+* @file referee_protocol.h
  * @author Ma HuaCheng
- * @brief 裁判系统通信模块
+ * @brief 裁判系统通信模块协议界定
  * @version 0.1
- * @details 提供裁判系统数据的接收与解析功能(该代码基于RoboMaster裁判系统串口协议V1.8.0 2025.4 进行开发)
- * @date 2025-10-01
- * @update 2025-10-06
+ * @details 提供裁判系统基本的命令与协议界定(该代码基于RoboMaster裁判系统串口协议V1.8.0 2025.4 进行开发)
+ * @date 2025-10-10
+ * @update 2025-10-10
  * @copyright  Copyright (c) 2025 HDU—PHOENIX
  * @todo
  */
-#ifndef JUDGEMENT_H
-#define JUDGEMENT_H
-#define _packed __attribute__((packed))
-#include <stdint.h>
-
-#define Referee_UART huart6
-#define Referee_IRQHandler USART6_IRQHandler
-
-#define   HEADER_SOF 0xA5 //帧头起始字节
-#define   REF_PROTOCOL_HEADER_SIZE 	  5				//帧头长
-#define   REF_PROTOCOL_CRC16_SIZE     2       //命令码长度
-#define   REF_PROTOCOL_TAIL_SIZE      2	      //帧尾CRC16
-#define   REF_DATA_ERROR      0
-#define   REF_DATA_CORRECT    1
-#define REF_USART_RX_BUF_LENTH 512
-#define REF_FIFO_BUF_LENGTH     1024
-#define REF_PROTOCOL_FRAME_MAX_SIZE 128
-#define REF_HEADER_CRC_LEN          (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE)
-#define REF_HEADER_CRC_CMDID_LEN    (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE + sizeof(uint16_t))
-#define REF_HEADER_CMDID_LEN        (REF_PROTOCOL_HEADER_SIZE + sizeof(uint16_t))
-
-
-
-extern uint8_t Judge_Self_ID;//当前机器人的ID
-extern uint16_t Judge_SelfClient_ID;//发送者机器人对应的客户端ID
+#ifndef REFEREE_PROTOCOL_H
+#define REFEREE_PROTOCOL_H
 
 #define Robot_ID_Red_Hero         1 //红方英雄
 #define Robot_ID_Red_Engineer     2 //红方工程
@@ -108,44 +85,6 @@ typedef enum {
     DECISION_LIDAR                 = 0x0121,      //雷达自主决策指令
 
 }referee_subcmd_id_e;
-
-
-typedef _packed struct
-{   //帧头格式
-    uint8_t SOF;
-    uint16_t Data_Length;
-    uint8_t Seq;
-    uint8_t CRC8;
-} frame_header_t;
-
-typedef _packed struct
-{   //单帧定义
-    frame_header_t frame_header;
-    uint16_t cmd_id;
-    referee_cmd_id_e data;
-    uint16_t  frame_tail;	//CRC16整包校验
-}frame_t;
-
-
-typedef enum
-{   //帧内关键块的起始字节位置
-    FRAME_HEADER         = 0,
-    CMD_ID               = 5,
-    DATA                 = 7,
-    STU_HEADER					 = 7,
-    STU_DATA             = 13
-} JudgeFrameOffset;
-
-typedef enum
-{   //帧头内部字段的起始字节位置
-    SOF          = 0,//起始位
-    DATA_LENGTH  = 1,//帧内数据长度,根据这个来获取数据长度
-    SEQ          = 3,//包序号
-    CRC8         = 4 //帧头CRC8校验
-} FrameHeaderOffset;
-
-
-
 
 
 
@@ -386,6 +325,38 @@ typedef _packed struct
     uint16_t cmd_source;
 }map_command_t;
 
+typedef _packed struct
+{   //Command 0x0302  自定义控制器与机器人交互数据(机器人接收)
+    uint8_t* data;
+}custom_robot_data_t;
+
+typedef _packed struct
+{   //Command 0x0309  自定义控制器接收机器人数据(自定义控制器接收)
+    uint8_t* data;
+}robot_custom_data_t;
+
+typedef _packed struct
+{  //Command 0x0304  键鼠数据
+int16_t mouse_x;
+int16_t mouse_y;
+int16_t mouse_z;
+int8_t left_button_down;
+int8_t right_button_down;
+uint16_t keyboard_value;
+uint16_t reserved;
+}remote_control_t;
+
+
+typedef _packed struct
+{   //Command 0x0306  自定义控制器与选手端交互数据
+    uint16_t key_value;
+    uint16_t x_position:12;
+    uint16_t mouse_left:4;
+    uint16_t y_position:12;
+    uint16_t mouse_right:4;
+    uint16_t reserved;
+}custom_client_data_t;
+
 
 //选手端接收数据
 typedef _packed struct
@@ -424,39 +395,4 @@ typedef _packed struct
 
 
 
-typedef _packed struct
-{   //Command 0x0302  自定义控制器与机器人交互数据(机器人接收)
-    uint8_t* data;
-}custom_robot_data_t;
-
-typedef _packed struct
-{   //Command 0x0309  自定义控制器接收机器人数据(自定义控制器接收)
-    uint8_t* data;
-}robot_custom_data_t;
-
-typedef _packed struct
-{  //Command 0x0304  键鼠数据
-int16_t mouse_x;
-int16_t mouse_y;
-int16_t mouse_z;
-int8_t left_button_down;
-int8_t right_button_down;
-uint16_t keyboard_value;
-uint16_t reserved;
-}remote_control_t;
-
-
-typedef _packed struct
-{   //Command 0x0306  自定义控制器与选手端交互数据
-    uint16_t key_value;
-    uint16_t x_position:12;
-    uint16_t mouse_left:4;
-    uint16_t y_position:12;
-    uint16_t mouse_right:4;
-    uint16_t reserved;
-}custom_client_data_t;
-
-
-
-
-#endif //JUDGEMENT_H
+#endif //JUDGEMENT_PROTOCOL_H
