@@ -11,28 +11,27 @@
  */
 #ifndef REFEREE_H
 #define REFEREE_H
-#define _packed __attribute__((packed))
+
 
 #include <stdint.h>
 #include "referee_protocol.h"
 #include "bsp_uart.h"
+#include "usart.h"
 
 
-#define   HEADER_SOF 0xA5 //帧头起始字节
+#define   REF_HEADER_SOF 0xA5 //帧头起始字节
 #define   REF_PROTOCOL_HEADER_SIZE 	  5				//帧头长
 #define   REF_PROTOCOL_CRC16_SIZE     2       //命令码长度
 #define   REF_PROTOCOL_TAIL_SIZE      2	      //帧尾CRC16
-#define   REF_DATA_ERROR      0
-#define   REF_DATA_CORRECT    1
-#define REF_USART_RX_BUF_LENTH 512
-#define REF_FIFO_BUF_LENGTH     1024
+
 #define REF_PROTOCOL_FRAME_MAX_SIZE 128
 #define REF_HEADER_CRC_LEN          (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE)
 #define REF_HEADER_CRC_CMDID_LEN    (REF_PROTOCOL_HEADER_SIZE + REF_PROTOCOL_CRC16_SIZE + sizeof(uint16_t))
 #define REF_HEADER_CMDID_LEN        (REF_PROTOCOL_HEADER_SIZE + sizeof(uint16_t))
 
 
-typedef _packed struct
+
+typedef struct _packed
 {   //帧头格式
     uint8_t SOF;
     uint16_t Data_Length;
@@ -40,7 +39,7 @@ typedef _packed struct
     uint8_t CRC8;
 } frame_header_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //单帧定义
     frame_header_t frame_header;
     uint16_t cmd_id;
@@ -48,23 +47,38 @@ typedef _packed struct
     uint16_t  frame_tail;	//CRC16整包校验
 }frame_t;
 
-typedef enum
-{   //帧内关键块的起始字节位置
-    FRAME_HEADER         = 0,
-    CMD_ID               = 5,
-    DATA                 = 7,
-    STU_HEADER					 = 7,
-    STU_DATA             = 13
-} RefereeFrameOffset;
 
-typedef enum
-{   //帧头内部字段的起始字节位置
-    SOF          = 0,//起始位
-    DATA_LENGTH  = 1,//帧内数据长度,根据这个来获取数据长度
-    SEQ          = 3,//包序号
-    CRC8         = 4 //帧头CRC8校验
-} FrameHeaderOffset;
+typedef struct _packed
+{
+    frame_header_t *p_header;
+    uint16_t       data_len;
+    uint8_t        protocol_packet[REF_PROTOCOL_FRAME_MAX_SIZE];
+    uint16_t       index;
+}Referee_unpack_data_s;
 
+typedef struct  {
+    char* topic_name;
+    UART_HandleTypeDef *uart_handle;
+}RefereeInitConfig_s;
+
+typedef struct {
+    char* topic_name;
+    UartInstance_s* uart_instance;
+}RefereeInstance_s;
+
+//裁判系统接收解包状态机
+typedef  enum {
+    STEP_HEADER_SOF  = 0,  //在搜索帧头SOF ing
+    STEP_LENGTH_LOW  = 1,  //在解析帧长度低字节ing
+    STEP_LENGTH_HIGH = 2,  //在解析帧长度高字节ing
+    STEP_FRAME_SEQ   = 3,  //在解析帧序号ing
+    STEP_HEADER_CRC8 = 4,  //在解析帧头CRC检验数ing
+    STEP_DATA_CRC16  = 5,  //解析数据帧ing
+}Referee_Rx_StatusMachine_e;
+
+
+RefereeInstance_s* Referee_Register(RefereeInitConfig_s* config);
+void Referee_Decode_unpack_data(Referee_unpack_data_s* data);
 
 
 

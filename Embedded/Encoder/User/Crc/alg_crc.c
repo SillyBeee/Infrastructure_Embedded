@@ -1,5 +1,5 @@
 #include "alg_crc.h"
-#include "crc.h"
+
 #include "main.h"
 /* Private define ------------------------------------------------------------*/
 #define CRC08_INIT (0xff)

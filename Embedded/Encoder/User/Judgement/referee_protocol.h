@@ -12,6 +12,10 @@
 #ifndef REFEREE_PROTOCOL_H
 #define REFEREE_PROTOCOL_H
 
+#ifndef _packed
+#define _packed __attribute__((packed))
+#endif
+
 #define Robot_ID_Red_Hero         1 //红方英雄
 #define Robot_ID_Red_Engineer     2 //红方工程
 #define Robot_ID_Red_Infantry3    3 //红方步兵3
@@ -89,7 +93,7 @@ typedef enum {
 
 
 
-typedef _packed struct
+typedef struct _packed
 {
     //Command 0x0001 比赛状态数据
     uint8_t game_type :4;     //1:对抗赛 2:单项赛 3:人工智能赛 4:联盟赛 5:步兵对抗赛
@@ -98,12 +102,12 @@ typedef _packed struct
     uint64_t SyncTimeStamp;  //UNIX时间，当机器人正确连接到裁判系统的NTP服务器后生效
 }game_status_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0002 比赛结果数据
     uint8_t winner;  //0:平局 1:红方获胜 2:蓝方获胜
 }game_result_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0003  机器人血量数据
     uint16_t red_1_robot_HP; //红方1号机器人血量
     uint16_t red_2_robot_HP; //红方2号机器人血量
@@ -123,25 +127,25 @@ typedef _packed struct
     uint16_t blue_base_HP; //蓝方基地血量
 }game_robot_HP_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0101  场地事件数据
     uint32_t event_data;
 }event_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0104 裁判警告信息
     uint8_t level;  //受罚等级 1:双方黄牌 2.黄牌 3.红牌 4.判负
     uint8_t offending_robot_id; //己方受罚机器人ID，判负和双方黄牌值为0
     uint8_t count; //己方最后一次受到判罚的违规机器人对应判罚等级的违规次数
 }referee_warning_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0105 飞镖发射相关数据
     uint8_t dart_remaining_time; //飞镖发射剩余时间，单位秒
     uint16_t dart_info;  //
 }dart_info_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0201  比赛机器人状态
     uint8_t robot_id;
     uint8_t robot_level;
@@ -155,7 +159,7 @@ typedef _packed struct
     uint8_t power_management_shooter_output : 1;
 }robot_status_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0202  实时功率热量数据
     uint16_t reserved1;
     uint16_t reserved2;
@@ -166,14 +170,14 @@ typedef _packed struct
     uint16_t shooter_42mm_barrel_heat;
 }power_heat_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0203  机器人位置
     float x;
     float y;
     float angle;
 }robot_pos_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0204  机器人增益
     uint8_t recovery_buff;
     uint8_t cooling_buff;
@@ -183,13 +187,13 @@ typedef _packed struct
     uint8_t remaining_energy;
 }buff_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0206  伤害状态
     uint8_t armor_id : 4;
     uint8_t HP_deduction_reason : 4;
 }hurt_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0207  实时射击信息
     uint8_t bullet_type;
     uint8_t shooter_number;
@@ -197,19 +201,19 @@ typedef _packed struct
     float initial_speed;
 }shoot_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0208  子弹剩余发射数
     uint16_t projectile_allowance_17mm;
     uint16_t projectile_allowance_42mm;
     uint16_t remaining_gold_coin;
 }projectile_allowance_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0209  机器人RFID状态
     uint32_t rfid_status;
 }rfid_status_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x020A  飞镖机器人客户端指令数据
     uint8_t dart_launch_opening_status;
     uint8_t reserved1;
@@ -217,7 +221,7 @@ typedef _packed struct
     uint16_t latest_launch_cmd_time;
 }dart_client_cmd_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x020B 地面机器人位置数据
     float hero_x;
     float hero_y;
@@ -231,24 +235,24 @@ typedef _packed struct
     float reserved2;
 }ground_robot_position_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x020C  雷达标记进度数据
     uint8_t mark_progress;
 }radar_mark_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x020D  哨兵自主决策信息同步
     uint32_t sentry_info;
     uint16_t sentry_info_2;
 } sentry_info_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x020E  雷达自主决策信息同步
     uint8_t radar_info;
 } radar_info_t;
 
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0301  机器人交互数据帧头
     uint16_t data_cmd_id;
     uint16_t sender_id;
@@ -256,19 +260,19 @@ typedef _packed struct
     uint8_t user_data[];
 }robot_interaction_header_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //机器人交互帧数据
     uint8_t * data;
 }robot_interaction_data_t;
 
 //机器人交互帧子协议
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0100
     uint8_t delete_type;
     uint8_t layer;
 }interaction_layer_delete_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0101
     uint8_t figure_name[3];
     uint32_t operate_type:3;
@@ -285,38 +289,38 @@ typedef _packed struct
     uint32_t details_e:11;
 }interaction_figure_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0102
     interaction_figure_t interaction_figure[2];
 }interaction_figure_2_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0103
     interaction_figure_t interaction_figure[5];
 }interaction_figure_3_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0104
     interaction_figure_t interaction_figure[7];
 }interaction_figure_4_t;
 
-typedef _packed struct
-{   //SubCommand 0x0110
-    graphic_data_struct_t grapic_data_struct;
-    uint8_t data[30];
-} ext_client_custom_character_t;
+// typedef struct _packed
+// {   //SubCommand 0x0110
+//     graphic_data_struct_t grapic_data_struct;
+//     uint8_t data[30];
+// } ext_client_custom_character_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0120
     uint32_t sentry_cmd;
 } sentry_cmd_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //SubCommand 0x0121
     uint8_t radar_cmd;
 } radar_cmd_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0303  小地图下发信息标识
     float target_position_x;
     float target_position_y;
@@ -325,17 +329,17 @@ typedef _packed struct
     uint16_t cmd_source;
 }map_command_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0302  自定义控制器与机器人交互数据(机器人接收)
     uint8_t* data;
 }custom_robot_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0309  自定义控制器接收机器人数据(自定义控制器接收)
     uint8_t* data;
 }robot_custom_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {  //Command 0x0304  键鼠数据
 int16_t mouse_x;
 int16_t mouse_y;
@@ -347,7 +351,7 @@ uint16_t reserved;
 }remote_control_t;
 
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0306  自定义控制器与选手端交互数据
     uint16_t key_value;
     uint16_t x_position:12;
@@ -359,7 +363,7 @@ typedef _packed struct
 
 
 //选手端接收数据
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0305  小地图接收信息标识
     uint16_t hero_position_x;
     uint16_t hero_position_y;
@@ -375,7 +379,7 @@ typedef _packed struct
     uint16_t sentry_position_y;
 } map_robot_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0307 选手端小地图接受路径数据
     uint8_t intention;
     uint16_t start_position_x;
@@ -385,7 +389,7 @@ typedef _packed struct
     uint16_t sender_id;
 }map_data_t;
 
-typedef _packed struct
+typedef struct _packed
 {   //Command 0x0308 选手端小地图接受机器人信息
     uint16_t sender_id;
     uint16_t receiver_id;
@@ -395,4 +399,4 @@ typedef _packed struct
 
 
 
-#endif //JUDGEMENT_PROTOCOL_H
+#endif //REFEREE_PROTOCOL_H

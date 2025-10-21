@@ -1,4 +1,4 @@
-# bsp_uart
+ bsp_uart
 
 ## 注意事项
 1. 只允许开启C板的UART1 UART6 和UART3（DBUS）
