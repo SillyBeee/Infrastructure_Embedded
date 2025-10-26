@@ -40,20 +40,11 @@ typedef struct _packed
 } frame_header_t;
 
 typedef struct _packed
-{   //单帧定义
-    frame_header_t frame_header;
-    uint16_t cmd_id;
-    referee_cmd_id_e data;
-    uint16_t  frame_tail;	//CRC16整包校验
-}frame_t;
-
-
-typedef struct _packed
 {
-    frame_header_t *p_header;
     uint16_t       data_len;
     uint8_t        protocol_packet[REF_PROTOCOL_FRAME_MAX_SIZE];
     uint16_t       index;
+    referee_cmd_id_e cmd_id;
 }Referee_unpack_data_s;
 
 typedef struct  {
@@ -64,6 +55,7 @@ typedef struct  {
 typedef struct {
     char* topic_name;
     UartInstance_s* uart_instance;
+    uint32_t cnt;
 }RefereeInstance_s;
 
 //裁判系统接收解包状态机
@@ -78,7 +70,7 @@ typedef  enum {
 
 
 RefereeInstance_s* Referee_Register(RefereeInitConfig_s* config);
-void Referee_Decode_unpack_data(Referee_unpack_data_s* data);
+void Referee_Decode_unpack_data(uint8_t* data);
 
 
 

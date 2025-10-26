@@ -39,5 +39,6 @@ uint8_t CRC08_Calculate(uint8_t  *Data, uint32_t Lenth /* Without check code len
 uint16_t CRC16_Calculate(uint8_t  *Data, uint32_t Lenth /* Without check code lenth 2 */);
 
 
+uint32_t CRC16_Verify(uint8_t *Data, uint32_t Lenth /* With check code lenth 2 */);
 
 #endif //ALG_CRC_H

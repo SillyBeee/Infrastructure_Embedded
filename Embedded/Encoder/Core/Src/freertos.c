@@ -49,6 +49,7 @@
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId Encoder_TaskHandle;
+osThreadId Referee_TaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -57,6 +58,7 @@ osThreadId Encoder_TaskHandle;
 
 void StartDefaultTask(void const * argument);
 void encoder_task(void const * argument);
+void referee_task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -111,6 +113,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(Encoder_Task, encoder_task, osPriorityIdle, 0, 128);
   Encoder_TaskHandle = osThreadCreate(osThread(Encoder_Task), NULL);
 
+  /* definition and creation of Referee_Task */
+  osThreadDef(Referee_Task, referee_task, osPriorityIdle, 0, 128);
+  Referee_TaskHandle = osThreadCreate(osThread(Referee_Task), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -151,6 +157,24 @@ __weak void encoder_task(void const * argument)
     osDelay(1);
   }
   /* USER CODE END encoder_task */
+}
+
+/* USER CODE BEGIN Header_referee_task */
+/**
+* @brief Function implementing the Referee_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_referee_task */
+__weak void referee_task(void const * argument)
+{
+  /* USER CODE BEGIN referee_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END referee_task */
 }
 
 /* Private application code --------------------------------------------------*/

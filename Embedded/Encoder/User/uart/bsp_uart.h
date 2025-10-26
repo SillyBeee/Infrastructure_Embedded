@@ -18,8 +18,8 @@
 
 /* 目前C板可以直接连接的UART */
 // #define UART_1 //如果使用UART1,需要定义此宏
-#define UART_3 //如果使用UART3,需要定义此宏
-//#define UART_6 //如果使用UART6,需要定义此宏
+// #define UART_3 //如果使用UART3,需要定义此宏
+#define UART_6 //如果使用UART6,需要定义此宏
 /* 为了兼容喵板等开发版设置的其他UART */
 // #define UART_2
 // #define UART_4

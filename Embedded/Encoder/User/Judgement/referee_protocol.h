@@ -58,7 +58,7 @@ typedef enum
     BULLET_REMAINING_CMD_ID           = 0x0208,  //子弹剩余发射数 常规链路 数据长度:6 10Hz 对应机器人可接收(除工程)
     ROBOT_RFID_STATE_CMD_ID           = 0x0209,  //机器人RFID状态 常规链路 数据长度:4 3Hz 装RFID机器人可接收
     DART_CLIENT_CMD_ID                = 0x020A,  //飞镖机器人客户端指令数据 常规链路 数据长度:6 3Hz 飞镖可接收
-    ROBOT_POSITION_DM_ID              = 0x020B,  //地面机器人位置数据 常规链路 数据长度:40 1Hz 哨兵可接收
+    GROUND_ROBOT_POSITION_CMD_ID      = 0x020B,  //地面机器人位置数据 常规链路 数据长度:40 1Hz 哨兵可接收
     LIDAR_PROGRESS_CMD_ID             = 0x020C,  //雷达标记进度数据 常规链路 数据长度:1 1Hz 雷达可接收
     SENTRY_INFO_CMD_ID                = 0x020D,  //哨兵自主决策信息同步 常规链路 数据长度:6 1Hz 哨兵可接收
     LIDAR_INFO_CMD_ID                 = 0x020E,  //雷达自主决策信息同步 常规链路 数据长度:1 1Hz 雷达可接收

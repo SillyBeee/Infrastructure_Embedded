@@ -139,3 +139,9 @@ uint16_t CRC16_Calculate(uint8_t *Data, uint32_t Lenth /* Without check code len
 	return CheckCode;
 }
 
+uint32_t CRC16_Verify(uint8_t *Data, uint32_t Lenth /* With check code lenth 2 */)
+{
+	if(Data == NULL || Lenth <= 2) return 0;
+	uint16_t Expected = CRC16_Calculate(Data, Lenth - 2);
+	return (Expected & 0xff) == Data[Lenth - 2] && ((Expected >> 8) & 0xff) == Data[Lenth - 1];
+}
