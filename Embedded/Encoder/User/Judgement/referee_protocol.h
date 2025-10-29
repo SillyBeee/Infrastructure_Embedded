@@ -16,28 +16,39 @@
 #define _packed __attribute__((packed))
 #endif
 
-#define Robot_ID_Red_Hero         1 //红方英雄
-#define Robot_ID_Red_Engineer     2 //红方工程
-#define Robot_ID_Red_Infantry3    3 //红方步兵3
-#define Robot_ID_Red_Infantry4    4 //红方步兵4
-#define Robot_ID_Red_Infantry5    5 //红方步兵5
-#define Robot_ID_Red_Aerial       6 //红方无人机
-#define Robot_ID_Red_Sentry       7 //红方哨兵
-#define Robot_ID_Red_Darts        8 //红方飞镖
-#define Robot_ID_Red_Radar        9 //红方雷达
-#define Robot_ID_Red_Outpost     10 //红方前哨站
-#define Robot_ID_Red_Base        11 //红方基地
-#define Robot_ID_Blue_Hero      101 //蓝方英雄
-#define Robot_ID_Blue_Engineer  102 //蓝方工程
-#define Robot_ID_Blue_Infantry3 103 //蓝方步兵3
-#define Robot_ID_Blue_Infantry4 104 //蓝方步兵4
-#define Robot_ID_Blue_Infantry5 105 //蓝方步兵5
-#define Robot_ID_Blue_Aerial    106 //蓝方无人机
-#define Robot_ID_Blue_Sentry    107 //蓝方哨兵
-#define Robot_ID_Blue_Darts     108 //蓝方飞镖
-#define Robot_ID_Blue_Radar     109 //蓝方雷达
-#define Robot_ID_Blue_Outpost   110 //红方前哨站
-#define Robot_ID_Blue_Base      111 //红方基地
+
+typedef enum {
+    Robot_ID_Red_Hero         = 1,  //红方英雄
+    Robot_ID_Red_Engineer     = 2,  //红方工程
+    Robot_ID_Red_Infantry3    = 3,  //红方步兵3
+    Robot_ID_Red_Infantry4    = 4,  //红方步兵4
+    Robot_ID_Red_Infantry5    = 5,  //红方步兵5
+    Robot_ID_Red_Aerial       = 6,  //红方无人机
+    Robot_ID_Red_Sentry       = 7,  //红方哨兵
+    Robot_ID_Red_Darts        = 8,  //红方飞镖
+    Robot_ID_Red_Radar        = 9,  //红方雷达
+    Robot_ID_Red_Outpost      = 10, //红方前哨站
+    Robot_ID_Red_Base         = 11, //红方基地
+
+    Robot_ID_Blue_Hero        = 101, //蓝方英雄
+    Robot_ID_Blue_Engineer    = 102, //蓝方工程
+    Robot_ID_Blue_Infantry3   = 103, //蓝方步兵3
+    Robot_ID_Blue_Infantry4   = 104, //蓝方步兵4
+    Robot_ID_Blue_Infantry5   = 105, //蓝方步兵5
+    Robot_ID_Blue_Aerial      = 106, //蓝方无人机
+    Robot_ID_Blue_Sentry      = 107, //蓝方哨兵
+    Robot_ID_Blue_Darts       = 108, //蓝方飞镖
+    Robot_ID_Blue_Radar       = 109, //蓝方雷达
+    Robot_ID_Blue_Outpost     = 110, //蓝方前哨站
+    Robot_ID_Blue_Base        = 111  //蓝方基地
+} referee_robot_id_e;
+
+
+typedef enum {
+    BLUE = 0,
+    RED  = 1
+} referee_color_e;
+
 
 typedef enum
 {   //各命令ID
@@ -331,12 +342,12 @@ typedef struct _packed
 
 typedef struct _packed
 {   //Command 0x0302  自定义控制器与机器人交互数据(机器人接收)
-    uint8_t* data;
+    uint8_t data[30];
 }custom_robot_data_t;
 
 typedef struct _packed
 {   //Command 0x0309  自定义控制器接收机器人数据(自定义控制器接收)
-    uint8_t* data;
+    uint8_t  data[30];
 }robot_custom_data_t;
 
 typedef struct _packed

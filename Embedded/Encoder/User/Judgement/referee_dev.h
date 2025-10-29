@@ -71,6 +71,28 @@ typedef  enum {
 
 RefereeInstance_s* Referee_Register(RefereeInitConfig_s* config);
 void Referee_Decode_unpack_data(uint8_t* data);
+void Referee_Data_Init();
+
+
+//辅助函数，从当前已解包裁判系统数据结构体中提取具体数据
+bool Referee_Get_Data_Status();
+bool Referee_Get_Color();
+uint8_t Referee_Get_Robot_ID();
+uint16_t Referee_Get_Client_ID();
+uint8_t Referee_Get_Game_Status();
+float Referee_Get_Chassis_Power();
+uint8_t Referee_Get_Power_Limit();
+uint16_t Referee_Get_Remain_Energy();
+uint8_t Referee_Get_Robot_Level();
+
+uint16_t Referee_Get_Shooter_Heat_42();
+uint16_t Referee_Get_Shooter_Heat_17();
+uint16_t Referee_Get_Heat_Limit();
+float Referee_Get_Shooter_Speed_42();
+float Referee_Get_Shooter_Speed_17();
+
+uint8_t Referee_Get_Shooter_Speed_Limit();
+uint16_t Referee_Get_Shoot_Cold();
 
 
 

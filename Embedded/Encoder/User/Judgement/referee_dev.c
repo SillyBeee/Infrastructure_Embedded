@@ -22,12 +22,13 @@
 
 uint8_t Referee_Self_ID; //当前机器人的ID
 uint16_t Referee_SelfClient_ID; //发送者机器人对应的客户端ID
+bool Referee_Data_TF = false; //当前裁判系统数据是否就绪
 
 Referee_Rx_StatusMachine_e status = 0; //当前解包状态机
 Referee_unpack_data_s unpack_data_buffer; // 当前解包实时存储的数据
 frame_header_t unpack_frame_header; //解包时存储当前帧头
 
-//解析完extern的全局变量，可以在此获取裁判系统数据
+//解析完extern的全局变量，可以在此获取原始裁判系统数据
 game_status_t ext_game_status;
 game_result_t ext_game_result;
 game_robot_HP_t ext_game_robot_HP;
@@ -155,6 +156,7 @@ static void Referee_Uart_Callback(UartInstance_s* instance)
         }
     default:
         {
+            Referee_Data_TF = false;
             status = STEP_HEADER_SOF;
             unpack_data_buffer.index = 0;
         }
@@ -247,6 +249,7 @@ void Referee_Decode_unpack_data(uint8_t* data)
         Log("Get unknown cmd id %d",unpack_data_buffer.cmd_id);
             break;
     }
+    Referee_Data_TF = true;
     // Log("Get Referee frame");
 }
 
