@@ -276,7 +276,10 @@ typedef struct _packed
     uint8_t * data;
 }robot_interaction_data_t;
 
-//机器人交互帧子协议
+
+
+
+//机器人交互帧子协议(UI)
 typedef struct _packed
 {   //SubCommand 0x0100
     uint8_t delete_type;
@@ -315,11 +318,25 @@ typedef struct _packed
     interaction_figure_t interaction_figure[7];
 }interaction_figure_4_t;
 
-// typedef struct _packed
-// {   //SubCommand 0x0110
-//     graphic_data_struct_t grapic_data_struct;
-//     uint8_t data[30];
-// } ext_client_custom_character_t;
+typedef struct _packed
+{   //SubCommand 0x0110
+    uint8_t  string_name[3];
+    uint32_t operate_type:3;
+    uint32_t graphic_type:3;
+    uint32_t layer:4;
+    uint32_t color:4;
+    uint32_t details_a:9;
+    uint32_t details_b:9;
+    uint32_t width:10;
+    uint32_t start_x:11;
+    uint32_t start_y:11;
+    uint32_t details_c:10;
+    uint32_t details_d:11;
+    uint32_t details_e:11;
+    uint8_t stringdata[30];
+} ext_client_custom_character_t;
+
+
 
 typedef struct _packed
 {   //SubCommand 0x0120

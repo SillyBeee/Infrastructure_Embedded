@@ -106,12 +106,12 @@ static void Referee_Uart_Callback(UartInstance_s* instance)
                 //TODO: CRC16校验
                 if (CRC16_Verify(unpack_data_buffer.protocol_packet, REF_HEADER_CRC_CMDID_LEN+unpack_data_buffer.data_len))
                 {
-                    Referee_Decode_unpack_data(((RefereeInstance_s*)instance->id),&unpack_data_buffer.protocol_packet);
+                    Referee_Decode_unpack_data(((RefereeInstance_s*)instance->id),unpack_data_buffer.protocol_packet);
                     ((RefereeInstance_s*)instance->id)->cnt++;
                 }
 
-                Referee_Decode_unpack_data(((RefereeInstance_s*)instance->id),&unpack_data_buffer.protocol_packet);
-                ((RefereeInstance_s*)instance->id)->cnt++;
+                // Referee_Decode_unpack_data(((RefereeInstance_s*)instance->id),&unpack_data_buffer.protocol_packet);
+                // ((RefereeInstance_s*)instance->id)->cnt++;
 
             }
             break;
@@ -299,6 +299,7 @@ uint16_t Referee_Get_Remain_Energy(const RefereeInstance_s* ref_instance) {
 uint16_t Referee_Get_Buffer_Energy(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_power_heat_data.buffer_energy;
 }
+
 uint8_t Referee_Get_Robot_Level(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_robot_status.robot_level;
 }
@@ -318,8 +319,6 @@ uint16_t Referee_Get_Heat_Limit(const RefereeInstance_s* ref_instance) {
 float Referee_Get_Shooter_Speed(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_shot_data.initial_speed;
 }
-
-
 
 uint16_t Referee_Get_Shooter_Cold(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_robot_status.shooter_barrel_cooling_value;
