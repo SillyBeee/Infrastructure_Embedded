@@ -19,47 +19,9 @@
 #include "bsp_log.h"
 #include "robot_config.h"
 
-
-uint8_t Referee_Self_ID; //当前机器人的ID
-uint16_t Referee_SelfClient_ID; //发送者机器人对应的客户端ID
-bool Referee_Data_TF = false; //当前裁判系统数据是否就绪
-
 Referee_Rx_StatusMachine_e status = 0; //当前解包状态机
 Referee_unpack_data_s unpack_data_buffer; // 当前解包实时存储的数据
 frame_header_t unpack_frame_header; //解包时存储当前帧头
-
-//解析完extern的全局变量，可以在此获取原始裁判系统数据
-game_status_t ext_game_status;
-game_result_t ext_game_result;
-game_robot_HP_t ext_game_robot_HP;
-event_data_t ext_event_data;
-referee_warning_t ext_referee_warning;
-dart_info_t ext_dart_info;
-robot_status_t ext_robot_status;
-power_heat_data_t ext_power_heat_data;
-robot_pos_t ext_robot_pos;
-buff_t ext_buff;
-hurt_data_t ext_hurt_data;
-shoot_data_t ext_shot_data;
-projectile_allowance_t ext_projectile_allowance;
-rfid_status_t ext_rfid_status;
-dart_client_cmd_t ext_dart_cmd;
-ground_robot_position_t ext_ground_robot_position;
-radar_mark_data_t ext_radar_mark_data;
-sentry_info_t ext_sentry_info;
-radar_info_t ext_radar_info;
-
-map_command_t ext_map_command;
-custom_robot_data_t ext_custom_robot_data;
-robot_custom_data_t ext_robot_custom_data;
-remote_control_t ext_remote_control;
-
-
-//TODO: 0x301机器人交互帧需要特殊处理,下面是子协议的变量
-//0x301机器人交互帧子协议
-sentry_cmd_t ext_sentry_cmd;
-radar_cmd_t ext_radar_cmd;
-
 
 //流式解包函数(因为裁判系统每帧长度不一且可能发生粘包需要流式解包)
 static void Referee_Uart_Callback(UartInstance_s* instance)
@@ -144,19 +106,19 @@ static void Referee_Uart_Callback(UartInstance_s* instance)
                 //TODO: CRC16校验
                 if (CRC16_Verify(unpack_data_buffer.protocol_packet, REF_HEADER_CRC_CMDID_LEN+unpack_data_buffer.data_len))
                 {
-                    Referee_Decode_unpack_data(&unpack_data_buffer.protocol_packet);
+                    Referee_Decode_unpack_data(((RefereeInstance_s*)instance->id),&unpack_data_buffer.protocol_packet);
                     ((RefereeInstance_s*)instance->id)->cnt++;
                 }
 
-                // Referee_Decode_unpack_data(&unpack_data_buffer.protocol_packet);
-                // ((RefereeInstance_s*)instance->id)->cnt++;
+                Referee_Decode_unpack_data(((RefereeInstance_s*)instance->id),&unpack_data_buffer.protocol_packet);
+                ((RefereeInstance_s*)instance->id)->cnt++;
 
             }
             break;
         }
     default:
         {
-            Referee_Data_TF = false;
+             ((RefereeInstance_s*)instance->id)->Referee_Data_TF = false;
             status = STEP_HEADER_SOF;
             unpack_data_buffer.index = 0;
         }
@@ -164,7 +126,8 @@ static void Referee_Uart_Callback(UartInstance_s* instance)
     }
 }
 
-void Referee_Decode_unpack_data(uint8_t* data)
+//数据帧解析函数
+void Referee_Decode_unpack_data(RefereeInstance_s* ref_instance, const uint8_t* data)
 {
     uint8_t index = 0;
     memcpy(&unpack_frame_header, data, sizeof(frame_header_t));
@@ -174,86 +137,86 @@ void Referee_Decode_unpack_data(uint8_t* data)
     index += sizeof(uint16_t);
     switch (unpack_data_buffer.cmd_id)
     {
-    case GAME_STATE_CMD_ID: memcpy(&ext_game_status, data + index, sizeof(game_status_t));
+    case GAME_STATE_CMD_ID: memcpy(&(ref_instance->origin_data.ext_game_status), data + index, sizeof(game_status_t));
         Log("Get game state");
         break;
-    case GAME_RESULT_CMD_ID: memcpy(&ext_game_result, data + index, sizeof(game_result_t));
+    case GAME_RESULT_CMD_ID: memcpy(&(ref_instance->origin_data.ext_game_result), data + index, sizeof(game_result_t));
         Log("Get game result");
         break;
-    case GAME_ROBOT_HP_CMD_ID: memcpy(&ext_game_robot_HP, data + index, sizeof(game_robot_HP_t));
+    case GAME_ROBOT_HP_CMD_ID: memcpy(&(ref_instance->origin_data.ext_game_robot_HP), data + index, sizeof(game_robot_HP_t));
         Log("Get game robot HP");
         break;
-    case FIELD_EVENTS_CMD_ID: memcpy(&ext_event_data, data + index, sizeof(event_data_t));
+    case FIELD_EVENTS_CMD_ID: memcpy(&(ref_instance->origin_data.ext_event_data), data + index, sizeof(event_data_t));
         Log("Get event data");
         break;
-    case REFEREE_WARNING_CMD_ID: memcpy(&ext_referee_warning, data + index, sizeof(referee_warning_t));
+    case REFEREE_WARNING_CMD_ID: memcpy(&(ref_instance->origin_data.ext_referee_warning), data + index, sizeof(referee_warning_t));
         Log("Get referee warning");
         break;
-    case DART_REMAINING_TIME_CMD_ID: memcpy(&ext_dart_info, data + index, sizeof(dart_info_t));
+    case DART_REMAINING_TIME_CMD_ID: memcpy(&(ref_instance->origin_data.ext_dart_info), data + index, sizeof(dart_info_t));
         Log("Get dart info");
         break;
-    case ROBOT_STATE_CMD_ID: memcpy(&ext_robot_status, data + index, sizeof(robot_status_t));
+    case ROBOT_STATE_CMD_ID: memcpy(&(ref_instance->origin_data.ext_robot_status), data + index, sizeof(robot_status_t));
         Log("Get robot status");
         break;
-    case POWER_HEAT_DATA_CMD_ID: memcpy(&ext_power_heat_data, data + index, sizeof(power_heat_data_t));
+    case POWER_HEAT_DATA_CMD_ID: memcpy(&(ref_instance->origin_data.ext_power_heat_data), data + index, sizeof(power_heat_data_t));
         Log("Get power heat data");
         break;
-    case ROBOT_POS_CMD_ID: memcpy(&ext_robot_pos, data + index, sizeof(robot_pos_t));
+    case ROBOT_POS_CMD_ID: memcpy(&(ref_instance->origin_data.ext_robot_pos), data + index, sizeof(robot_pos_t));
         Log("Get robot pos");
         break;
-    case BUFF_MUSK_CMD_ID: memcpy(&ext_buff, data + index, sizeof(buff_t));
+    case BUFF_MUSK_CMD_ID: memcpy(&(ref_instance->origin_data.ext_buff), data + index, sizeof(buff_t));
         Log("Get buff");
         break;
-    case ROBOT_HURT_CMD_ID: memcpy(&ext_hurt_data, data + index, sizeof(hurt_data_t));
+    case ROBOT_HURT_CMD_ID: memcpy(&(ref_instance->origin_data.ext_hurt_data), data + index, sizeof(hurt_data_t));
         Log("Get hurt");
         break;
-    case SHOOT_DATA_CMD_ID: memcpy(&ext_shot_data, data + index, sizeof(shoot_data_t));
+    case SHOOT_DATA_CMD_ID: memcpy(&(ref_instance->origin_data.ext_shot_data), data + index, sizeof(shoot_data_t));
         Log("Get shot data");
         break;
-    case BULLET_REMAINING_CMD_ID: memcpy(&ext_projectile_allowance, data + index, sizeof(projectile_allowance_t));
+    case BULLET_REMAINING_CMD_ID: memcpy(&(ref_instance->origin_data.ext_projectile_allowance), data + index, sizeof(projectile_allowance_t));
         Log("Get projectile allowance");
         break;
-    case ROBOT_RFID_STATE_CMD_ID: memcpy(&ext_rfid_status, data + index, sizeof(rfid_status_t));
+    case ROBOT_RFID_STATE_CMD_ID: memcpy(&(ref_instance->origin_data.ext_rfid_status), data + index, sizeof(rfid_status_t));
         Log("Get rfid status");
         break;
-    case DART_CLIENT_CMD_ID: memcpy(&ext_dart_cmd, data + index, sizeof(dart_client_cmd_t));
+    case DART_CLIENT_CMD_ID: memcpy(&(ref_instance->origin_data.ext_dart_cmd), data + index, sizeof(dart_client_cmd_t));
         Log("Get dart client");
         break;
     case GROUND_ROBOT_POSITION_CMD_ID:
-        memcpy(&ext_ground_robot_position, data + index, sizeof(ground_robot_position_t));
+        memcpy(&(ref_instance->origin_data.ext_ground_robot_position), data + index, sizeof(ground_robot_position_t));
         Log("Get ground robot position");
         break;
-    case LIDAR_PROGRESS_CMD_ID: memcpy(&ext_radar_mark_data, data + index, sizeof(radar_mark_data_t));
+    case LIDAR_PROGRESS_CMD_ID: memcpy(&(ref_instance->origin_data.ext_radar_mark_data), data + index, sizeof(radar_mark_data_t));
         Log("Get radar mark");
         break;
-    case SENTRY_INFO_CMD_ID: memcpy(&ext_sentry_info, data + index, sizeof(sentry_info_t));
+    case SENTRY_INFO_CMD_ID: memcpy(&(ref_instance->origin_data.ext_sentry_info), data + index, sizeof(sentry_info_t));
         Log("Get sentry info");
         break;
-    case LIDAR_INFO_CMD_ID: memcpy(&ext_radar_info, data + index, sizeof(radar_info_t));
+    case LIDAR_INFO_CMD_ID: memcpy(&(ref_instance->origin_data.ext_radar_info), data + index, sizeof(radar_info_t));
         Log("Get radar info");
         break;
 
-    case ROBOT_COMMAND_CMD_ID: memcpy(&ext_map_command, data + index, sizeof(map_command_t));
+    case ROBOT_COMMAND_CMD_ID: memcpy(&(ref_instance->origin_data.ext_map_command), data + index, sizeof(map_command_t));
         Log("Get map command");
         break;
-    case CUSTOM_CONTROLLER_DATA_CMD_ID: memcpy(&ext_custom_robot_data, data + index, sizeof(custom_robot_data_t));
+    case CUSTOM_CONTROLLER_DATA_CMD_ID: memcpy(&(ref_instance->origin_data.ext_custom_robot_data), data + index, sizeof(custom_robot_data_t));
         Log("Get custom_robot data");
         break;
-    case CUSTOM_CONTROLLER_RECEIVED_DATA_CMD_ID: memcpy(&ext_robot_custom_data, data + index,sizeof(custom_robot_data_t));
+    case CUSTOM_CONTROLLER_RECEIVED_DATA_CMD_ID: memcpy(&(ref_instance->origin_data.ext_robot_custom_data), data + index,sizeof(custom_robot_data_t));
         Log("client get robot data");
         break;
-    case KEYBOARD_MOUSE_DATA_CMD_ID: memcpy(&ext_remote_control, data + index, sizeof(remote_control_t));
+    case KEYBOARD_MOUSE_DATA_CMD_ID: memcpy(&(ref_instance->origin_data.ext_remote_control), data + index, sizeof(remote_control_t));
         Log("client get remote_control");
         break;
     default:
         Log("Get unknown cmd id %d",unpack_data_buffer.cmd_id);
             break;
     }
-    Referee_Data_TF = true;
+    ref_instance->Referee_Data_TF = true;
     // Log("Get Referee frame");
 }
 
-RefereeInstance_s* Referee_Register(RefereeInitConfig_s* config)
+RefereeInstance_s* Referee_Register(const RefereeInitConfig_s* config)
 {
     if (config == NULL)
     {
@@ -280,6 +243,84 @@ RefereeInstance_s* Referee_Register(RefereeInitConfig_s* config)
     instance->uart_instance = uart_instance;
     instance->topic_name = config->topic_name;
     instance->cnt = 0;
+    instance->Referee_Data_TF = false;
+
+    Referee_Data_Init(instance);
     Log_Passing("%s : Referee instance register success", config->topic_name);
     return instance;
+}
+
+void Referee_Data_Init(RefereeInstance_s* ref_instance) {
+    memset(&(ref_instance->origin_data),0,sizeof(Referee_Origin_data_s));
+}
+
+bool Referee_Get_Data_Status(const RefereeInstance_s* ref_instance) {
+    return ref_instance->Referee_Data_TF;
+}
+
+bool Referee_Get_Color(RefereeInstance_s* ref_instance) {
+    ref_instance->Referee_Self_ID = ref_instance->origin_data.ext_robot_status.robot_id;
+    if (ref_instance->origin_data.ext_robot_status.robot_id > 10) {
+        return BLUE;
+    }
+    else {
+        return RED;
+    }
+}
+
+uint8_t Referee_Get_Robot_ID(RefereeInstance_s* ref_instance) {
+    ref_instance->Referee_Self_ID = ref_instance->origin_data.ext_robot_status.robot_id;
+    return ref_instance->Referee_Self_ID;
+}
+
+uint16_t Referee_Get_Client_ID(RefereeInstance_s* ref_instance) {
+    bool color = Referee_Get_Color(ref_instance);
+    if (color == BLUE) {
+        ref_instance->Referee_SelfClient_ID = 0x0164+(ref_instance->Referee_Self_ID - 100);
+    }
+    else {
+        ref_instance->Referee_SelfClient_ID = 0x0100 + ref_instance->Referee_Self_ID;
+    }
+    return ref_instance->Referee_SelfClient_ID;
+}
+
+uint8_t Referee_Get_Game_Status(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_game_status.game_progress;
+}
+
+uint8_t Referee_Get_Power_Limit(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_robot_status.chassis_power_limit;
+}
+
+uint16_t Referee_Get_Remain_Energy(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_buff.remaining_energy ;
+}
+
+uint16_t Referee_Get_Buffer_Energy(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_power_heat_data.buffer_energy;
+}
+uint8_t Referee_Get_Robot_Level(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_robot_status.robot_level;
+}
+
+uint16_t Referee_Get_Shooter_Heat_42(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_power_heat_data.shooter_42mm_barrel_heat;
+}
+
+uint16_t Referee_Get_Shooter_Heat_17(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_power_heat_data.shooter_17mm_1_barrel_heat;
+}
+
+uint16_t Referee_Get_Heat_Limit(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_robot_status.shooter_barrel_heat_limit;
+}
+
+float Referee_Get_Shooter_Speed(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_shot_data.initial_speed;
+}
+
+
+
+uint16_t Referee_Get_Shooter_Cold(const RefereeInstance_s* ref_instance) {
+    return ref_instance->origin_data.ext_robot_status.shooter_barrel_cooling_value;
 }

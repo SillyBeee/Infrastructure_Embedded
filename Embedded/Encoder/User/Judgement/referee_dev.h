@@ -47,6 +47,41 @@ typedef struct _packed
     referee_cmd_id_e cmd_id;
 }Referee_unpack_data_s;
 
+
+typedef struct _packed {
+    //解析完的原始结构体变量，可以在此获取原始裁判系统数据
+    game_status_t ext_game_status;
+    game_result_t ext_game_result;
+    game_robot_HP_t ext_game_robot_HP;
+    event_data_t ext_event_data;
+    referee_warning_t ext_referee_warning;
+    dart_info_t ext_dart_info;
+    robot_status_t ext_robot_status;
+    power_heat_data_t ext_power_heat_data;
+    robot_pos_t ext_robot_pos;
+    buff_t ext_buff;
+    hurt_data_t ext_hurt_data;
+    shoot_data_t ext_shot_data;
+    projectile_allowance_t ext_projectile_allowance;
+    rfid_status_t ext_rfid_status;
+    dart_client_cmd_t ext_dart_cmd;
+    ground_robot_position_t ext_ground_robot_position;
+    radar_mark_data_t ext_radar_mark_data;
+    sentry_info_t ext_sentry_info;
+    radar_info_t ext_radar_info;
+
+    map_command_t ext_map_command;
+    custom_robot_data_t ext_custom_robot_data;
+    robot_custom_data_t ext_robot_custom_data;
+    remote_control_t ext_remote_control;
+
+    //TODO: 0x301机器人交互帧需要特殊处理,下面是子协议的变量
+    //0x301机器人交互帧子协议
+    sentry_cmd_t ext_sentry_cmd;
+    radar_cmd_t ext_radar_cmd;
+}Referee_Origin_data_s;
+
+
 typedef struct  {
     char* topic_name;
     UART_HandleTypeDef *uart_handle;
@@ -55,6 +90,10 @@ typedef struct  {
 typedef struct {
     char* topic_name;
     UartInstance_s* uart_instance;
+    Referee_Origin_data_s origin_data;
+    bool Referee_Data_TF ; //当前裁判系统数据是否就绪
+    uint8_t Referee_Self_ID; //当前机器人的ID
+    uint16_t Referee_SelfClient_ID; //发送者机器人对应的客户端ID
     uint32_t cnt;
 }RefereeInstance_s;
 
@@ -69,30 +108,32 @@ typedef  enum {
 }Referee_Rx_StatusMachine_e;
 
 
-RefereeInstance_s* Referee_Register(RefereeInitConfig_s* config);
-void Referee_Decode_unpack_data(uint8_t* data);
-void Referee_Data_Init();
+RefereeInstance_s* Referee_Register(const RefereeInitConfig_s* config);
+void Referee_Decode_unpack_data(RefereeInstance_s* ref_instance, const uint8_t* data);
+void Referee_Data_Init(RefereeInstance_s* ref_instance);
 
 
 //辅助函数，从当前已解包裁判系统数据结构体中提取具体数据
-bool Referee_Get_Data_Status();
-bool Referee_Get_Color();
-uint8_t Referee_Get_Robot_ID();
-uint16_t Referee_Get_Client_ID();
-uint8_t Referee_Get_Game_Status();
-float Referee_Get_Chassis_Power();
-uint8_t Referee_Get_Power_Limit();
-uint16_t Referee_Get_Remain_Energy();
-uint8_t Referee_Get_Robot_Level();
+bool Referee_Get_Data_Status(const RefereeInstance_s* ref_instance);
+bool Referee_Get_Color(RefereeInstance_s* ref_instance);
+uint8_t Referee_Get_Robot_ID(RefereeInstance_s* ref_instance);
+uint16_t Referee_Get_Client_ID(RefereeInstance_s* ref_instance);
+uint8_t Referee_Get_Game_Status(const RefereeInstance_s* ref_instance);
 
-uint16_t Referee_Get_Shooter_Heat_42();
-uint16_t Referee_Get_Shooter_Heat_17();
-uint16_t Referee_Get_Heat_Limit();
-float Referee_Get_Shooter_Speed_42();
-float Referee_Get_Shooter_Speed_17();
+uint8_t Referee_Get_Power_Limit(const RefereeInstance_s* ref_instance);
+uint16_t Referee_Get_Remain_Energy(const RefereeInstance_s* ref_instance);
+uint16_t Referee_Get_Buffer_Energy(const RefereeInstance_s* ref_instance);
+uint8_t Referee_Get_Robot_Level(const RefereeInstance_s* ref_instance);
 
-uint8_t Referee_Get_Shooter_Speed_Limit();
-uint16_t Referee_Get_Shoot_Cold();
+uint16_t Referee_Get_Shooter_Heat_42(const RefereeInstance_s* ref_instance);
+uint16_t Referee_Get_Shooter_Heat_17(const RefereeInstance_s* ref_instance);
+uint16_t Referee_Get_Heat_Limit(const RefereeInstance_s* ref_instance);
+float Referee_Get_Shooter_Speed(const RefereeInstance_s* ref_instance);
+uint16_t Referee_Get_Shooter_Cold(const RefereeInstance_s* ref_instance);
+
+
+//UI辅助绘画函数
+
 
 
 
