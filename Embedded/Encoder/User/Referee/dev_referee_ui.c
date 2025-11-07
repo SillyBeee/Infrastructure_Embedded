@@ -1,5 +1,5 @@
 /**
-* @file referee_ui.c
+* @file dev_referee_ui.c
  * @author Ma HuaCheng
  * @brief 裁判系统通信UI绘制协议协定
  * @version 0.1
@@ -11,7 +11,7 @@
  */
 
 
-#include "referee_ui.h"
+#include "dev_referee_ui.h"
 
 #include <string.h>
 

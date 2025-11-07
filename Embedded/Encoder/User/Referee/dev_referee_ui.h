@@ -1,5 +1,5 @@
 /**
-* @file referee_ui.h
+* @file dev_referee_ui.h
  * @author Ma HuaCheng
  * @brief 裁判系统通信UI绘制协议协定
  * @version 0.1
@@ -10,14 +10,14 @@
  * @todo
  */
 
-#ifndef REFEREE_UI_H
-#define REFEREE_UI_H
+#ifndef DEV_REFEREE_UI_H
+#define DEV_REFEREE_UI_H
 
 #ifndef _packed
 #define _packed __attribute__((packed))
 #endif
 
-#include "referee_dev.h"
+#include "dev_referee.h"
 
 //结构体重定向一下方便识别，原结构体名与官方串口协议结构体名字一致
 typedef interaction_figure_t  referee_ui_graphic_data_t;
@@ -132,6 +132,19 @@ typedef enum {
 
 
 //UI辅助绘画函数(基础原始版)
+/**
+ * @brief 在UI上绘制直线(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI 图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param Width 线宽
+ * @param StartX 起始坐标X
+ * @param StartY 起始坐标Y
+ * @param EndX 截止坐标X
+ * @param EndY 截止坐标Y
+ */
 void Referee_UI_Draw_Line(RefereeInstance_s *ref_instance,
                           char GraphName[3],
                           uint8_t GraphOperate,
@@ -143,6 +156,20 @@ void Referee_UI_Draw_Line(RefereeInstance_s *ref_instance,
                           uint16_t EndX, //截止坐标X
                           uint16_t EndY); //截止坐标Y
 
+
+/**
+ * @brief 在UI上绘制矩形(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance  裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI 图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param Width 线宽
+ * @param StartX  起始坐标X
+ * @param StartY 起始坐标Y
+ * @param EndX 对角坐标X
+ * @param EndY 对角坐标Y
+ */
 void Referee_UI_Draw_Rectangle(RefereeInstance_s *ref_instance,
                                char GraphName[3], //图形名 作为客户端的索引
                                uint8_t GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -154,6 +181,19 @@ void Referee_UI_Draw_Rectangle(RefereeInstance_s *ref_instance,
                                uint16_t EndX, //截止坐标X
                                uint16_t EndY); //截止坐标Y
 
+
+/**
+ * @brief 在UI上绘制圆形(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI 图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param Width 线宽
+ * @param CenterX 圆心坐标X
+ * @param CenterY 圆心坐标Y
+ * @param Radius 半径
+ */
 void Referee_UI_Draw_Circle(RefereeInstance_s *ref_instance,
                             char GraphName[3], //图形名 作为客户端的索引
                             uint8_t GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -164,6 +204,19 @@ void Referee_UI_Draw_Circle(RefereeInstance_s *ref_instance,
                             uint16_t CenterY, //圆心坐标Y
                             uint16_t Radius); //半径
 
+/**
+ * @brief 在UI上绘制椭圆(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate  UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI 图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param Width 线宽
+ * @param CenterX 圆心坐标X
+ * @param CenterY 圆心坐标Y
+ * @param XHalfAxis X半轴长度
+ * @param YHalfAxis Y半轴长度
+ */
 void Referee_UI_Draw_Ellipse(RefereeInstance_s *ref_instance,
                              char GraphName[3], //图形名 作为客户端的索引
                              uint8_t GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -176,6 +229,21 @@ void Referee_UI_Draw_Ellipse(RefereeInstance_s *ref_instance,
                              uint16_t YHalfAxis); //Y半轴长
 
 
+/**
+ * @brief 在UI上绘制圆弧(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI 图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param StartAngle //起始角度 [0,360]
+ * @param EndAngle //截止角度 [0,360]
+ * @param Width //线宽
+ * @param CenterX //圆心坐标X
+ * @param CenterY //圆心坐标Y
+ * @param XHalfAxis //X半轴长
+ * @param YHalfAxis //Y半轴长
+ */
 void Referee_UI_Draw_Arc(RefereeInstance_s *ref_instance,
                          char GraphName[3], //图形名 作为客户端的索引
                          uint8_t GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -189,6 +257,19 @@ void Referee_UI_Draw_Arc(RefereeInstance_s *ref_instance,
                          uint16_t XHalfAxis, //X半轴长
                          uint16_t YHalfAxis); //Y半轴长
 
+/**
+ * @brief 在UI上绘制浮点数(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param NumberSize 字体大小
+ * @param Width 线宽
+ * @param StartX 起始坐标X
+ * @param StartY 起始坐标Y
+ * @param FloatData 数字内容
+ */
 void Referee_UI_Draw_Float(RefereeInstance_s *ref_instance,
                            char GraphName[3], //图形名 作为客户端的索引
                            uint8_t GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -200,6 +281,19 @@ void Referee_UI_Draw_Float(RefereeInstance_s *ref_instance,
                            uint16_t StartY, //起始坐标Y
                            float FloatData); //数字内容
 
+/**
+ * @brief 在UI上绘制整数(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param GraphName 图形名 作为客户端的索引
+ * @param GraphOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI 图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param NumberSize 字体大小
+ * @param Width 线宽
+ * @param StartX 起始坐标X
+ * @param StartY 起始坐标Y
+ * @param IntData 数字内容
+ */
 void Referee_UI_Draw_Int(RefereeInstance_s *ref_instance,
                          char GraphName[3], //图形名 作为客户端的索引
                          uint8_t GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -211,6 +305,20 @@ void Referee_UI_Draw_Int(RefereeInstance_s *ref_instance,
                          uint16_t StartY, //起始坐标Y
                          int32_t IntData); //数字内容
 
+/**
+ * @brief 在UI上绘制字符串(数据存入缓存区，出发推送函数后发送数据)
+ * @param ref_instance 裁判系统实例
+ * @param StringName 图形名 作为客户端的索引
+ * @param StringOperate UI图形操作 对应UI_Graph_XXX的4种操作
+ * @param Layer UI图形图层 [0,9]
+ * @param Color UI图形颜色 对应UI_Color_XXX的9种颜色
+ * @param CharSize 字体大小
+ * @param StringLength 字符串长度
+ * @param Width 线宽
+ * @param StartX 起始坐标X
+ * @param StartY 起始坐标Y
+ * @param StringData 字符串内容
+ */
 void Referee_UI_Draw_String(RefereeInstance_s *ref_instance,
                             char StringName[3], //图形名 作为客户端的索引
                             uint8_t StringOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
@@ -223,12 +331,28 @@ void Referee_UI_Draw_String(RefereeInstance_s *ref_instance,
                             uint16_t StartY, //起始坐标Y
                             char *StringData); //字符串内容
 
+/**
+ * @brief 推送所有本地暂存所有数据(调用推送图形数据，字符串数据，删除图层数据,所以仍需保证图形缓存为1,2,5,7个，其他数据长度无法发送)
+ * @param ref_instance 裁判系统实例
+ */
 void Referee_UI_PushUp_All(RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 推送所有本地暂存的图形数据
+ * @param ref_instance 裁判系统实例
+ */
 void Referee_UI_PushUp_Graphs(RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 推送所有本地暂存的字符串数据
+ * @param ref_instance 裁判系统实例
+ */
 void Referee_UI_PushUp_String(RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 推送所有本地暂存的删除图层数据
+ * @param ref_instance 裁判系统实例
+ */
 void Referee_UI_PushUp_Delete(RefereeInstance_s *ref_instance);
 
 

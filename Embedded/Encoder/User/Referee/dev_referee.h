@@ -1,5 +1,5 @@
 /**
-* @file referee_dev.h
+* @file dev_referee.h
  * @author Ma HuaCheng
  * @brief 裁判系统通信模块
  * @version 0.1
@@ -9,12 +9,12 @@
  * @copyright  Copyright (c) 2025 HDU—PHOENIX
  * @todo
  */
-#ifndef REFEREE_H
-#define REFEREE_H
+#ifndef DEV_REFEREE_H
+#define DEV_REFEREE_H
 
 
 #include <stdint.h>
-#include "referee_protocol.h"
+#include "dev_referee_protocol.h"
 #include "bsp_uart.h"
 #include "usart.h"
 
@@ -107,43 +107,135 @@ typedef enum {
     STEP_DATA_CRC16 = 5, //解析数据帧ing
 } Referee_Rx_StatusMachine_e;
 
-
+/**
+ * @brief 裁判系统注册函数
+ * @param config 初始化参数
+ * @return 裁判系统实例指针
+ */
 RefereeInstance_s *Referee_Register(const RefereeInitConfig_s *config);
 
+/**
+ * @brief 裁判系统数据解包函数
+ * @param ref_instance 裁判系统实例
+ * @param data 原始数据
+ * @note 该函数为内部函数，外部无需调用
+ */
 void Referee_Decode_unpack_data(RefereeInstance_s *ref_instance, const uint8_t *data);
 
+/**
+ * @brief 裁判系统数据初始化函数
+ * @param ref_instance 裁判系统实例
+ * @note 该函数为内部函数，外部无需调用
+ */
 void Referee_Data_Init(RefereeInstance_s *ref_instance);
 
 
 //辅助函数，从当前已解包裁判系统数据结构体中提取具体数据
+
+/**
+ * @brief 获取裁判系统数据状态
+ * @param ref_instance 裁判系统实例
+ * @return 数据是否就绪 false:未就绪 true:就绪
+ */
 bool Referee_Get_Data_Status(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取队伍颜色(红蓝)
+ * @param ref_instance 裁判系统实例
+ * @return 颜色为 0:蓝队 1:红队
+ */
 bool Referee_Get_Color(RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取机器人ID
+ * @param ref_instance 裁判系统实例
+ * @return 机器人ID,详情ID代表的意思可见referee_protocol.h
+ */
 uint8_t Referee_Get_Robot_ID(RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取客户端ID
+ * @param ref_instance 裁判系统实例
+ * @return 客户端ID,详情ID代表的意思可见referee_protocol.h
+ */
 uint16_t Referee_Get_Client_ID(RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取当前比赛阶段
+ * @param ref_instance 裁判系统实例
+ * @return 比赛阶段 0:未开始 1:准备阶段 2:自检阶段 3:5秒倒计时 4:比赛中 5:比赛结算中
+ */
 uint8_t Referee_Get_Game_Status(const RefereeInstance_s *ref_instance);
 
-uint8_t Referee_Get_Power_Limit(const RefereeInstance_s *ref_instance);
+/**
+ * @brief 裁判系统获取机器人当前底盘功率限制
+ * @param ref_instance 裁判系统实例
+ * @return 机器人当前底盘功率限制
+ */
+uint16_t Referee_Get_Power_Limit(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取机器人当前剩余能量(底盘能量耗尽后会导致底盘功率上限大幅缩减)
+ * @param ref_instance 裁判系统实例
+ * @return 机器人剩余当前能量值返回，以16进制标识机器人剩余能量值比例，仅在剩余能量小于50%时反馈，其余默认反馈0x32
+ * bit0: 在剩余能量>=50%时为1,其余情况为0
+ * bit1：在剩余能量≥30%时为 1，其余情况为 0
+ * bit2：在剩余能量≥15%时为 1，其余情况为 0
+ * bit3：在剩余能量≥5%时为 1，其余情况为 0
+ * Bit4：在剩余能量≥1%时为 1，其余情况为 0
+ */
 uint16_t Referee_Get_Remain_Energy(const RefereeInstance_s *ref_instance);
 
+
+/**
+ * @brief 裁判系统获取机器人当前剩余缓冲能量(缓冲能量耗尽且底盘功率超限会导致底盘断电)
+ * @param ref_instance 裁判系统实例
+ * @return 缓冲能量（单位：J）
+ */
 uint16_t Referee_Get_Buffer_Energy(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取机器人等级
+ * @param ref_instance 裁判系统实例
+ * @return 机器人当前等级
+ */
 uint8_t Referee_Get_Robot_Level(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取当前42mm发射机构热量
+ * @param ref_instance 裁判系统实例
+ * @return 当前42mm发射机构热量
+ */
 uint16_t Referee_Get_Shooter_Heat_42(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取当前17mm发射机构热量
+ * @param ref_instance 裁判系统实例
+ * @return 当前17mm发射机构热量
+ */
 uint16_t Referee_Get_Shooter_Heat_17(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取当前机器人发射机构热量上限
+ * @param ref_instance 裁判系统实例
+ * @return 当前机器人发射机构热量上限
+ */
 uint16_t Referee_Get_Heat_Limit(const RefereeInstance_s *ref_instance);
 
+/**
+ * @biref 裁判系统获取当前机器人发射(上一发)弹丸初速度
+ * @param ref_instance 裁判系统实例
+ * @return 当前机器人发射弹丸初速度
+ */
 float Referee_Get_Shooter_Speed(const RefereeInstance_s *ref_instance);
 
+/**
+ * @brief 裁判系统获取当前机器人发射机构射击热量每秒冷却值
+ * @param ref_instance 裁判系统实例
+ * @return 当前机器人发射机构裁判系统实例
+ */
 uint16_t Referee_Get_Shooter_Cold(const RefereeInstance_s *ref_instance);
 
 
 ;
-#endif //REFEREE_H
+#endif //DEV_REFEREE_H

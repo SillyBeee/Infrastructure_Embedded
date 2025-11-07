@@ -1,7 +1,7 @@
 #include "referee_task.h"
 #include "bsp_log.h"
 #include "cmsis_os.h"
-#include "referee_dev.h"
+#include "dev_referee.h"
 
 RefereeInitConfig_s ref_config = {
 .topic_name = "referee",

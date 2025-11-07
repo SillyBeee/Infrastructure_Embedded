@@ -105,6 +105,7 @@ const uint16_t CRC16_Table[256] =
 0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
 };
 
+/* CRC_CCITT算法实现 */
 /**
  * @brief 用于计算单个字节的CRC-CCITT值
  * @param crc 上一个CRC值
@@ -122,8 +123,10 @@ uint16_t Crc_Ccitt_Calculate(uint16_t crc, uint8_t const *buffer, size_t len)
 		crc = Crc_ccitt_byte(crc, *buffer++);
 	return crc;
 }
-/* CRC_CCITT算法实现 */
 
+
+
+/* CRC8算法实现 */
 uint8_t CRC08_Calculate(uint8_t *Data, uint32_t Lenth /* Without check code lenth 1 */)
 {
 	uint8_t CheckCode = CRC08_INIT;
@@ -131,6 +134,14 @@ uint8_t CRC08_Calculate(uint8_t *Data, uint32_t Lenth /* Without check code lent
 	return CheckCode;
 }
 
+uint32_t CRC08_Verify(uint8_t *Data, uint32_t Lenth /* With check code lenth 1 */)
+{
+	if(Data == NULL || Lenth <= 2) return 0;
+	return CRC08_Calculate(Data, Lenth - 1) == Data[Lenth - 1];
+}
+
+
+/* CRC16算法实现 */
 uint16_t CRC16_Calculate(uint8_t *Data, uint32_t Lenth /* Without check code lenth 2 */)
 {
 	uint16_t CheckCode = CRC16_INIT;

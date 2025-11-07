@@ -1,5 +1,5 @@
 /**
-* @file referee_dev.c
+* @file dev_referee.c
  * @author Ma HuaCheng
  * @brief 裁判系统通信模块
  * @version 0.1
@@ -11,7 +11,7 @@
  */
 
 
-#include "referee_dev.h"
+#include "dev_referee.h"
 
 #include <string.h>
 
@@ -288,7 +288,7 @@ uint8_t Referee_Get_Game_Status(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_game_status.game_progress;
 }
 
-uint8_t Referee_Get_Power_Limit(const RefereeInstance_s* ref_instance) {
+uint16_t Referee_Get_Power_Limit(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_robot_status.chassis_power_limit;
 }
 

@@ -1,5 +1,5 @@
 /**
-* @file referee_protocol.h
+* @file dev_referee_protocol.h
  * @author Ma HuaCheng
  * @brief 裁判系统通信模块协议界定
  * @version 0.1
@@ -9,8 +9,8 @@
  * @copyright  Copyright (c) 2025 HDU—PHOENIX
  * @todo
  */
-#ifndef REFEREE_PROTOCOL_H
-#define REFEREE_PROTOCOL_H
+#ifndef DEV_REFEREE_PROTOCOL_H
+#define DEV_REFEREE_PROTOCOL_H
 
 #ifndef _packed
 #define _packed __attribute__((packed))
@@ -427,4 +427,4 @@ typedef struct _packed
 
 
 
-#endif //REFEREE_PROTOCOL_H
+#endif //DEV_REFEREE_PROTOCOL_H
