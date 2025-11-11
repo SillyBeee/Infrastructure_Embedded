@@ -22,7 +22,7 @@
 Referee_Rx_StatusMachine_e status = 0; //当前解包状态机
 Referee_unpack_data_s unpack_data_buffer; // 当前解包实时存储的数据
 frame_header_t unpack_frame_header; //解包时存储当前帧头
-
+uint8_t referee_tx_buffer[137]; //最长可发送包长度 5+2+127+2+1
 //流式解包函数(因为裁判系统每帧长度不一且可能发生粘包需要流式解包)
 static void Referee_Uart_Callback(UartInstance_s* instance)
 {
@@ -254,6 +254,26 @@ void Referee_Data_Init(RefereeInstance_s* ref_instance) {
     memset(&(ref_instance->origin_data),0,sizeof(Referee_Origin_data_s));
 }
 
+bool Referee_Send_Msg(RefereeInstance_s* ref_instance, referee_cmd_id_e cmd_id,uint16_t data_length,uint8_t seq, uint8_t *data ) {
+    if (ref_instance==NULL) {
+        Log_Error("Send_msg: ref_instance is NULL");
+        return false;
+    }
+    referee_tx_buffer[0] = REF_HEADER_SOF;
+    referee_tx_buffer[1] = (uint8_t)(data_length & 0xFF);
+    referee_tx_buffer[2] = (uint8_t)((data_length >> 8) & 0xFF);
+    referee_tx_buffer[3] = seq;
+    referee_tx_buffer[4] = CRC08_Calculate(referee_tx_buffer, 4);
+    referee_tx_buffer[5] = (uint8_t)(cmd_id & 0xFF);
+    referee_tx_buffer[6] = (uint8_t)((cmd_id >> 8) & 0xFF);
+    memcpy(referee_tx_buffer+7,data,data_length);
+    uint16_t crc16 = CRC16_Calculate(referee_tx_buffer, 7 +  data_length);
+    referee_tx_buffer[7+data_length] = (uint8_t)(crc16 & 0xFF);
+    referee_tx_buffer[7+data_length+1] = (uint8_t)((crc16 >> 8)&0xFF);
+    referee_tx_buffer[7+data_length+2] = '\n';
+    return Uart_Transmit(ref_instance->uart_instance, referee_tx_buffer);
+}
+
 bool Referee_Get_Data_Status(const RefereeInstance_s* ref_instance) {
     return ref_instance->Referee_Data_TF;
 }
@@ -323,3 +343,30 @@ float Referee_Get_Shooter_Speed(const RefereeInstance_s* ref_instance) {
 uint16_t Referee_Get_Shooter_Cold(const RefereeInstance_s* ref_instance) {
     return ref_instance->origin_data.ext_robot_status.shooter_barrel_cooling_value;
 }
+
+
+bool Referee_Send_Custom_Msg_To_Robot( RefereeInstance_s *ref_instance,uint8_t *data , uint16_t length)
+{
+    //计数
+    static int custom_robot_msg_cnt = 0;
+    if (length > 32) {
+        Log_Error("Custom_Controller to Robot data > 32");
+        return false;
+    }
+    return Referee_Send_Msg(ref_instance, CUSTOM_CONTROLLER_DATA_CMD_ID, length, custom_robot_msg_cnt++, data);
+}
+
+
+bool Referee_Send_Robot_Msg_To_Controller( RefereeInstance_s *ref_instance,uint8_t *data,uint16_t length)
+{
+    //计数
+    static int robot_custom_msg_cnt = 0;
+    if (length > 32) {
+        Log_Error("Robot to Custom_Controller data > 32");
+        return false;
+    }
+    return Referee_Send_Msg(ref_instance, CUSTOM_CONTROLLER_RECEIVED_DATA_CMD_ID, length, robot_custom_msg_cnt++, data);
+
+}
+
+

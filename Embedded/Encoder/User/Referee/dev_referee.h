@@ -81,7 +81,6 @@ typedef struct _packed {
 } Referee_Origin_data_s;
 
 
-
 typedef struct {
     char *topic_name;
     UART_HandleTypeDef *uart_handle;
@@ -128,6 +127,18 @@ void Referee_Decode_unpack_data(RefereeInstance_s *ref_instance, const uint8_t *
  * @note 该函数为内部函数，外部无需调用
  */
 void Referee_Data_Init(RefereeInstance_s *ref_instance);
+
+/**
+ * @brief 向裁判系统发送数据
+ * @param ref_instance 裁判系统实例
+ * @param cmd_id 命令 ID
+ * @param data_length 数据长度
+ * @param seq 包序号
+ * @param data 数据指针
+ * @return 是否发送成功
+ */
+bool Referee_Send_Msg(RefereeInstance_s* ref_instance,referee_cmd_id_e cmd_id,uint16_t data_length,uint8_t seq, uint8_t *data );
+
 
 
 //辅助函数，从当前已解包裁判系统数据结构体中提取具体数据
@@ -237,5 +248,27 @@ float Referee_Get_Shooter_Speed(const RefereeInstance_s *ref_instance);
 uint16_t Referee_Get_Shooter_Cold(const RefereeInstance_s *ref_instance);
 
 
-;
+
+
+//发送辅助函数
+
+/**
+ * @brief 向裁判系统发送自定义控制器数据(自定义控制器->对应图传连接机器人) 0x302
+ * @param ref_instance 裁判系统实例
+ * @param data 自定义控制器自定义数据
+ * @param length 自定义数据长度
+ * @return 发送结果 true:发送成功 false:发送失败
+ */
+bool Referee_Send_Custom_Msg_To_Robot(RefereeInstance_s *ref_instance,uint8_t *data, uint16_t length);
+
+/**
+ * @brief 向裁判系统发送机器人数据(机器人->自定义控制器) 0x309
+ * @param ref_instance 裁判系统实例
+ * @param data 自定义控制器自定义数据
+ * @param length 自定义数据长度
+ * @return 发送结果 true:发送成功 false:发送失败
+ */
+bool Referee_Send_Robot_Msg_To_Controller(RefereeInstance_s *ref_instance,uint8_t *data, uint16_t length);
+
+
 #endif //DEV_REFEREE_H
