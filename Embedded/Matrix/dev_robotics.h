@@ -1,89 +1,82 @@
 /**
- ******************************************************************************
- * @file    robotics.cpp/h
- * @brief   Robotic toolbox on STM32. STM32机器人学库
- * @author  Spoon Guan
- * @ref     [1] SJTU ME385-2, Robotics, Y.Ding
- *          [2] Bruno Siciliano, et al., Robotics: Modelling, Planning and
- *              Control, Springer, 2010.
- *          [3] R.Murry, Z.X.Li, and S.Sastry, A Mathematical Introduction
- *              to Robotic Manipulation, CRC Press, 1994.
- ******************************************************************************
- * Copyright (c) 2023 Team JiaoLong-SJTU
- * All rights reserved.
- ******************************************************************************
- */
+*   @file dev_robotics.h
+*   @brief 该文件是对SJTU的机器人库的整理,封装与拓展
+*   @author HuaCheng Ma
+*   @date 2026/1/20
+*   @version 0.1
+*   @note
+*/
 
-#ifndef ROBOTICS_H
-#define ROBOTICS_H
 
-#include "utils.h"
-#include "matrix.h"
+#ifndef DEV_ROBOTICS_H
+#define DEV_ROBOTICS_H
+#include "dev_matrix.h"
 
 namespace robotics {
-// rotation matrix(R) -> RPY([yaw;pitch;roll])
+//旋转矩阵->rpy  rotation matrix(R) -> RPY([yaw;pitch;roll])
 Matrixf<3, 1> r2rpy(Matrixf<3, 3> R);
-// RPY([yaw;pitch;roll]) -> rotation matrix(R)
+//rpy->旋转矩阵 RPY([yaw;pitch;roll]) -> rotation matrix(R)
 Matrixf<3, 3> rpy2r(Matrixf<3, 1> rpy);
-// rotation matrix(R) -> angle vector([r;θ])
+//旋转矩阵->轴角 rotation matrix(R) -> angle vector([r;θ])
 Matrixf<4, 1> r2angvec(Matrixf<3, 3> R);
-// angle vector([r;θ]) -> rotation matrix(R)
+//轴角->旋转矩阵 angle vector([r;θ]) -> rotation matrix(R)
 Matrixf<3, 3> angvec2r(Matrixf<4, 1> angvec);
-// rotation matrix(R) -> quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
+//旋转矩阵->四元数 rotation matrix(R) -> quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
 Matrixf<4, 1> r2quat(Matrixf<3, 3> R);
-// quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> rotation matrix(R)
+//四元数->旋转矩阵 quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> rotation matrix(R)
 Matrixf<3, 3> quat2r(Matrixf<4, 1> quat);
-// quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> RPY([yaw;pitch;roll])
+//四元数->rpy quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> RPY([yaw;pitch;roll])
 Matrixf<3, 1> quat2rpy(Matrixf<4, 1> q);
-// RPY([yaw;pitch;roll]) -> quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
+//rpy->四元数 RPY([yaw;pitch;roll]) -> quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
 Matrixf<4, 1> rpy2quat(Matrixf<3, 1> rpy);
-// quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> angle vector([r;θ])
+//四元数->轴角 quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> angle vector([r;θ])
 Matrixf<4, 1> quat2angvec(Matrixf<4, 1> q);
-// angle vector([r;θ]) -> quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
+//轴角->四元数 angle vector([r;θ]) -> quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
 Matrixf<4, 1> angvec2quat(Matrixf<4, 1> angvec);
-// homogeneous transformation matrix(T) -> rotation matrix(R)
+//齐次变换矩阵->旋转矩阵 homogeneous transformation matrix(T) -> rotation matrix(R)
 Matrixf<3, 3> t2r(Matrixf<4, 4> T);
-// rotation matrix(R) -> homogeneous transformation matrix(T)
+//齐次变换矩阵->旋转矩阵 rotation matrix(R) -> homogeneous transformation matrix(T)
 Matrixf<4, 4> r2t(Matrixf<3, 3> R);
-// homogeneous transformation matrix(T) -> translation vector(p)
+//齐次变换矩阵->平移向量 homogeneous transformation matrix(T) -> translation vector(p)
 Matrixf<3, 1> t2p(Matrixf<4, 4> T);
-// translation vector(p) -> homogeneous transformation matrix(T)
+
+//平移向量->齐次变换矩阵 translation vector(p) -> homogeneous transformation matrix(T)
 Matrixf<4, 4> p2t(Matrixf<3, 1> p);
-// rotation matrix(R) & translation vector(p) -> homogeneous transformation
-// matrix(T)
+
+//平移加旋转->齐次变换矩阵 rotation matrix(R) & translation vector(p) -> homogeneous transformation
 Matrixf<4, 4> rp2t(Matrixf<3, 3> R, Matrixf<3, 1> p);
-// homogeneous transformation matrix(T) -> RPY([yaw;pitch;roll])
+//齐次变换矩阵->rpy homogeneous transformation matrix(T) -> RPY([yaw;pitch;roll])
 Matrixf<3, 1> t2rpy(Matrixf<4, 4> T);
-// inverse of homogeneous transformation matrix(T^-1=[R',-R'P;0,1])
+//齐次变换矩阵求逆 inverse of homogeneous transformation matrix(T^-1=[R',-R'P;0,1])
 Matrixf<4, 4> invT(Matrixf<4, 4> T);
-// RPY([yaw;pitch;roll]) -> homogeneous transformation matrix(T)
+//rpy->齐次变换矩阵 RPY([yaw;pitch;roll]) -> homogeneous transformation matrix(T)
 Matrixf<4, 4> rpy2t(Matrixf<3, 1> rpy);
-// homogeneous transformation matrix(T) -> angle vector([r;θ])
+//齐次变换矩阵->角度向量 homogeneous transformation matrix(T) -> angle vector([r;θ])
 Matrixf<4, 1> t2angvec(Matrixf<4, 4> T);
-// angle vector([r;θ]) -> homogeneous transformation matrix(T)
+//角度向量->齐次变换矩阵 angle vector([r;θ]) -> homogeneous transformation matrix(T)
 Matrixf<4, 4> angvec2t(Matrixf<4, 1> angvec);
-// homogeneous transformation matrix(T) -> quaternion,
-// [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
+//齐次变换矩阵->四元数 homogeneous transformation matrix(T) -> quaternion,[q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)]
 Matrixf<4, 1> t2quat(Matrixf<4, 4> T);
-// quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> homogeneous transformation
-// matrix(T)
+//四元数->齐次变换矩阵 quaternion, [q0;q1;q2;q3]=[cos(θ/2);rsin(θ/2)] -> homogeneous transformation
 Matrixf<4, 4> quat2t(Matrixf<4, 1> quat);
-// homogeneous transformation matrix(T) -> twist coordinates vector ([p;rθ])
+//齐次变换矩阵->twist坐标向量 homogeneous transformation matrix(T) -> twist coordinates vector ([p;rθ])
 Matrixf<6, 1> t2twist(Matrixf<4, 4> T);
-// twist coordinates vector ([p;rθ]) -> homogeneous transformation matrix(T)
+//twist坐标向量->齐次变换矩阵 twist coordinates vector ([p;rθ]) -> homogeneous transformation matrix(T)
 Matrixf<4, 4> twist2t(Matrixf<6, 1> twist);
 
-// joint type: R-revolute joint, P-prismatic joint
+
+
+//关节类型: 旋转关节(R-revolute joint), 滑动关节(P-prismatic joint)
 typedef enum joint_type {
   R = 0,
   P = 1,
 } Joint_Type_e;
 
-// Denavit–Hartenberg(DH) method
+//DH法 Denavit–Hartenberg(DH) method
 struct DH_t {
-  // forward kinematic
+  //正向运动学解算 forward kinematic
   Matrixf<4, 4> fkine();
-  // DH parameter
+  //DH参数 DH parameter
   float theta;
   float d;
   float a;
@@ -91,9 +84,10 @@ struct DH_t {
   Matrixf<4, 4> T;
 };
 
+//连杆类
 class Link {
  public:
-  Link(){};
+  Link()= default;
   Link(float theta, float d, float a, float alpha, Joint_Type_e type = R,
        float offset = 0, float qmin = 0, float qmax = 0, float m = 1,
        Matrixf<3, 1> rc = matrixf::zeros<3, 1>(),
@@ -102,30 +96,35 @@ class Link {
 
   Link& operator=(Link link);
 
+  //获取关节限位
   float qmin() { return qmin_; }
   float qmax() { return qmax_; }
+  //获取关节类型
   Joint_Type_e type() { return type_; }
+  //获取动力学参数
   float m() { return m_; }
   Matrixf<3, 1> rc() { return rc_; }
   Matrixf<3, 3> I() { return I_; }
-
-  Matrixf<4, 4> T(float q);  // forward kinematic
+  //获取当前连杆末端的齐次变换矩阵(正运动学解算)
+  Matrixf<4, 4> T(float q);
 
  public:
-  // kinematic parameter
+  //运动学参数
   DH_t dh_;
   float offset_;
-  // limit(qmin,qmax), no limit if qmin<=qmax
+  //关节限位  limit(qmin,qmax), no limit if qmin<=qmax
   float qmin_;
   float qmax_;
-  // joint type
+  //关节类型
   Joint_Type_e type_;
-  // dynamic parameter
-  float m_;           // mass
-  Matrixf<3, 1> rc_;  // centroid(link coordinate)
-  Matrixf<3, 3> I_;   // inertia tensor(3*3)
+  //动力学参数
+  float m_;           //连杆质量 mass
+  Matrixf<3, 1> rc_;  //连杆质心在连杆局部坐标系下的坐标 centroid(link coordinate)
+  Matrixf<3, 3> I_;   //连杆在连杆坐标系下的惯性张量 inertia tensor(3*3)
 };
 
+
+//模板类,用于描述串联的一个关节组(机械臂)
 template <uint16_t _n = 1>
 class Serial_Link {
  public:
@@ -142,9 +141,11 @@ class Serial_Link {
     gravity_ = gravity;
   }
 
-  // forward kinematic: T_n^0
-  // param[in] q: joint variable vector
-  // param[out] T_n^0
+  /**
+   * @brief 机械臂正运动学求解
+   * @param q  当前所有关节角度构成的向量
+   * @return 末端齐次变换矩阵(相对于基坐标系)
+   */
   Matrixf<4, 4> fkine(Matrixf<_n, 1> q) {
     T_ = matrixf::eye<4, 4>();
     for (int iminus1 = 0; iminus1 < _n; iminus1++)
@@ -152,10 +153,13 @@ class Serial_Link {
     return T_;
   }
 
-  // forward kinematic: T_k^0
-  // param[in] q: joint variable vector
-  // param[in] k: joint number
-  // param[out] T_k^0
+
+  /**
+   * @brief 对机械臂指定关节进行正运动学求解
+   * @param q  当前所有关节角度构成的向量
+   * @param k  所需的关节序号
+   * @return 指定关节相对于基坐标系的齐次变换矩阵
+   */
   Matrixf<4, 4> fkine(Matrixf<_n, 1> q, uint16_t k) {
     if (k > _n)
       k = _n;
@@ -165,19 +169,24 @@ class Serial_Link {
     return T;
   }
 
-  // T_k^k-1: homogeneous transformation matrix of link k
-  // param[in] q: joint variable vector
-  // param[in] kminus: joint number k, input k-1
-  // param[out] T_k^k-1
+  /**
+   * @brief 对机械臂指定关节进行正运动学求解(关节相对于前一关节的齐次变换矩阵)
+   * @param q 当前所有关节角度构成的向量
+   * @param kminus1 所需的关节序号-1
+   * @return 指定关节相对于前一关节的齐次变换矩阵
+   */
   Matrixf<4, 4> T(Matrixf<_n, 1> q, uint16_t kminus1) {
     if (kminus1 >= _n)
       kminus1 = _n - 1;
     return links_[kminus1].T(q[kminus1][0]);
   }
 
-  // jacobian matrix, J_i = [J_pi;j_oi]
-  // param[in] q: joint variable vector
-  // param[out] jacobian matix J_6*n
+
+  /**
+   * @brief 计算机械臂末端雅可比矩阵(即关节速度与末端速度的映射矩阵)
+   * @param q 当前所有关节角度构成的向量
+   * @return 机械臂末端雅可比矩阵 上3行表示线速度部分,下3行表示角速度部分
+   */
   Matrixf<6, _n> jacob(Matrixf<_n, 1> q) {
     Matrixf<3, 1> p_e = t2p(fkine(q));               // p_e
     Matrixf<4, 4> T_iminus1 = matrixf::eye<4, 4>();  // T_i-1^0
@@ -211,13 +220,15 @@ class Serial_Link {
     return J_;
   }
 
-  // inverse kinematic, numerical solution(Newton method)
-  // param[in] T: homogeneous transformation matrix of end effector
-  // param[in] q: initial joint variable vector(q0) for Newton method's
-  //              iteration
-  // param[in] tol: tolerance of error (norm(error of twist vector))
-  // param[in] max_iter: maximum iterations, default 30
-  // param[out] q: joint variable vector
+
+  /**
+   * @brief 机械臂逆运动学求解
+   * @param Td 末端齐次变换矩阵目标值
+   * @param q 初始关节变量向量(牛顿法迭代初值)
+   * @param tol 误差容限(扭转向量误差的范数)
+   * @param max_iter 最大迭代次数，默认50
+   * @return 关节变量向量
+   */
   Matrixf<_n, 1> ikine(Matrixf<4, 4> Td,
                        Matrixf<_n, 1> q = matrixf::zeros<_n, 1>(),
                        float tol = 1e-4f, uint16_t max_iter = 50) {
@@ -279,14 +290,20 @@ class Serial_Link {
     return q;
   }
 
-  // (Reserved function) inverse kinematic, analytic solution(geometric method)
+
+  //(保留功能)运动学逆解,解析解(几何法)
   Matrixf<_n, 1> (*ikine_analytic)(Matrixf<4, 4> T);
 
-  // inverse dynamic, Newton-Euler method
-  // param[in]  q: joint variable vector
-  // param[in]  qv: dq/dt
-  // param[in]  qa: d^2q/dt^2
-  // param[in]  he: load on end effector [f;μ], default 0
+
+
+  /**
+   * @brief 机械臂逆动力学求解(牛顿-欧拉法)
+   * @param q 当前关节角度向量
+   * @param qv 当前关节速度向量
+   * @param qa 当前关节加速度向量
+   * @param he 末端负荷向量([Fx;Fy;Fz;Mx;My;Mz])
+   * @return
+   */
   Matrixf<_n, 1> rne(Matrixf<_n, 1> q,
                      Matrixf<_n, 1> qv = matrixf::zeros<_n, 1>(),
                      Matrixf<_n, 1> qa = matrixf::zeros<_n, 1>(),
@@ -396,12 +413,13 @@ class Serial_Link {
   }
 
  private:
-  Link links_[_n];
-  Matrixf<3, 1> gravity_;
+  Link links_[_n];  //连杆组
+  Matrixf<3, 1> gravity_; //重力加速度向量
 
-  Matrixf<4, 4> T_;
-  Matrixf<6, _n> J_;
+  Matrixf<4, 4> T_;         //末端齐次变换矩阵
+  Matrixf<6, _n> J_;        //末端雅可比矩阵
 };
 };  // namespace robotics
 
-#endif  // ROBOTICS_H
+
+#endif //DEV_ROBOTICS_H

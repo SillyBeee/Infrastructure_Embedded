@@ -1,20 +1,13 @@
 /**
- ******************************************************************************
- * @file    robotics.cpp/h
- * @brief   Robotic toolbox on STM32. STM32机器人学库
- * @author  Spoon Guan
- * @ref     [1] SJTU ME385-2, Robotics, Y.Ding
- *          [2] Bruno Siciliano, et al., Robotics: Modelling, Planning and
- *              Control, Springer, 2010.
- *          [3] R.Murry, Z.X.Li, and S.Sastry, A Mathematical Introduction
- *              to Robotic Manipulation, CRC Press, 1994.
- ******************************************************************************
- * Copyright (c) 2023 Team JiaoLong-SJTU
- * All rights reserved.
- ******************************************************************************
- */
+*   @file dev_robotics.cpp
+*   @brief 该文件是对SJTU的机器人库的整理,封装与拓展
+*   @author HuaCheng Ma
+*   @date 2026/1/20
+*   @version 0.1
+*   @note
+*/
 
-#include "robotics.h"
+#include "dev_robotics.h"
 
 Matrixf<3, 1> robotics::r2rpy(Matrixf<3, 3> R) {
   float rpy[3] = {
