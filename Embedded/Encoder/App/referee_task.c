@@ -2,13 +2,16 @@
 #include "bsp_log.h"
 #include "cmsis_os.h"
 #include "dev_referee.h"
-
+#include "usart.h"
+#include "encoder.h"
 RefereeInitConfig_s ref_config = {
 .topic_name = "referee",
 .uart_handle = &huart6,
 };
 
 RefereeInstance_s* ref_instance;
+
+
 void referee_task(void const * argument)
 {
     ref_instance = Referee_Register(&ref_config);
@@ -16,6 +19,8 @@ void referee_task(void const * argument)
     {
         Log_Error("register referee failed");
     }
+
+
     while (1)
     {
         osDelay(1);
